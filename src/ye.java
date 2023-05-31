@@ -8,7 +8,8 @@ public class ye {
 	static StringTokenizer st;
 
 	public static void main(String[] args) throws IOException {
-
+		
+		System.out.println("TEsting");
 	}
 
 	static String next() throws IOException {
