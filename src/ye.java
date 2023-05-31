@@ -9,7 +9,7 @@ public class ye {
 
 	public static void main(String[] args) throws IOException {
 		
-		System.out.println("TEsting");
+		System.out.println("number");
 	}
 
 	static String next() throws IOException {
