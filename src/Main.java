@@ -20,7 +20,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	}
 	
 	public static void main(String[] args) {
-		System.out.println("wagwan");
+		System.out.println("bop");
 		JFrame frame = new JFrame("OMORI");
 		Main panel = new Main();
 		frame.add(panel);
