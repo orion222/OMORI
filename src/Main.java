@@ -1,3 +1,4 @@
+
 import javax.swing.*;
 
 
@@ -12,11 +13,34 @@ import java.util.*;
 
 public class Main extends JPanel implements KeyListener, MouseListener, Runnable{
 
+	boolean up, down, left, right; // movement in a direction
+	boolean legUp, legDown, legLeft, legRight; // determines which leg to display when running in the same diredction
+	ArrayList<BufferedImage> playerImages = new ArrayList<>(); // arraylist of player images
+	int playerIndex = 1; // which image to display of player
+	int playerX = 100, playerY = 100;
+	
+	Player Player = new Player(this);
+	
 	
 	public Main() {
 		setPreferredSize(new Dimension(1000, 600));
-		setBackground(new Color(255, 255, 255));
+		setBackground(new Color(200, 0, 0));
 		
+		addKeyListener(this);
+		this.setFocusable(true);
+		
+		try {
+			for(int i = 0; i < 12; i++) {
+				playerImages.add(ImageIO.read(new File("runAnimation/" + (i+1) + ".png")));
+			}
+		}
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		Thread thread = new Thread(this);
+		thread.start();
 	}
 	
 	public static void main(String[] args) {
@@ -27,12 +51,57 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		frame.pack();
 		frame.setVisible(true);
 		frame.setResizable(false);
+
+	}
+	
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		Graphics2D g2d = (Graphics2D) g;
+		
+		try {
+			Thread.sleep(60);
+			g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+		
+
 	}
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
-		
+
+		while(true) {
+			try {
+				Thread.sleep(1000/20);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			if(up) {
+				Player.key = 1;
+				playerY -= 10;
+				Player.run();
+			}
+			if(down) {
+				Player.key = 3;
+				playerY += 10;
+				Player.run();
+			}
+			if(left) {
+				Player.key = 2;
+				playerX -= 10;
+				Player.run();
+			}
+			if(right) {
+				Player.key = 4;
+				playerX += 10;
+				Player.run();
+			}
+		}
 	}
 
 	@Override
@@ -73,13 +142,62 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		// TODO Auto-generated method stub
+		int key = e.getKeyCode();
+
+		// w
+		if(key == 87) {
+			System.out.println("w");
+			up = true;
+		}
+		// a
+		else if(key == 65) {
+			System.out.println("a");
+			left = true;
+		}
+		// s
+		else if(key == 83) {
+			System.out.println("s");
+			down = true;
+		}
+		// d
+		else if(key == 68) {
+			System.out.println("d");
+			right = true;
+		}
+		repaint();
 		
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
 		// TODO Auto-generated method stub
+		int key = e.getKeyCode();
+
+		// w
+		if(key == 87) {
+			System.out.println("w releaes");
+			up = false;
+			playerIndex = 10;
+		}
+		// a
+		else if(key == 65) {
+			System.out.println("a relaes");
+			left = false;
+			playerIndex = 4;
+		}
+		// s
+		else if(key == 83) {
+			System.out.println("s release");
+			down = false;
+			playerIndex = 1;
+		}
+		// d
+		else if(key == 68) {
+			System.out.println("d release");
+			right = false;
+			playerIndex = 7;
+		}
 		
+		repaint();
 	}
 }
