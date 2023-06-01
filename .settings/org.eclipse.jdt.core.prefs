@@ -2,6 +2,7 @@ eclipse.preferences.version=1
 org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode=enabled
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 org.eclipse.jdt.core.compiler.codegen.targetPlatform=17
 org.eclipse.jdt.core.compiler.codegen.unusedLocal=preserve
 org.eclipse.jdt.core.compiler.compliance=17
@@ -15,6 +16,11 @@ org.eclipse.jdt.core.compiler.codegen.targetPlatform=17
 org.eclipse.jdt.core.compiler.codegen.unusedLocal=preserve
 org.eclipse.jdt.core.compiler.compliance=17
 >>>>>>> e9b18ad (fds)
+=======
+org.eclipse.jdt.core.compiler.codegen.targetPlatform=17
+org.eclipse.jdt.core.compiler.codegen.unusedLocal=preserve
+org.eclipse.jdt.core.compiler.compliance=17
+>>>>>>> 27df9f9 (fds)
 org.eclipse.jdt.core.compiler.debug.lineNumber=generate
 org.eclipse.jdt.core.compiler.debug.localVariable=generate
 org.eclipse.jdt.core.compiler.debug.sourceFile=generate
@@ -25,6 +31,7 @@ org.eclipse.jdt.core.compiler.problem.reportPreviewFeatures=warning
 org.eclipse.jdt.core.compiler.release=enabled
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 org.eclipse.jdt.core.compiler.source=17
 =======
 org.eclipse.jdt.core.compiler.source=16
@@ -32,3 +39,6 @@ org.eclipse.jdt.core.compiler.source=16
 =======
 org.eclipse.jdt.core.compiler.source=17
 >>>>>>> e9b18ad (fds)
+=======
+org.eclipse.jdt.core.compiler.source=17
+>>>>>>> 27df9f9 (fds)
