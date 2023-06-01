@@ -16,8 +16,9 @@ public class Player extends JPanel implements Runnable{
 
 	public Main game;
 	
-	public Player(Main e) {
-		game = e;
+
+	public Player(Main Main) {
+		game = Main;
 	}
 
 	int key = 0;

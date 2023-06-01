@@ -20,26 +20,36 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	int playerX = 100, playerY = 100;
 	
 	Player Player = new Player(this);
+	public static int menuState = 0;
+	public static Thread thread;
+	public static int mapX = 0;
+	public static int mapY = 0;	
+	public static BufferedImage[] screens = new BufferedImage[5];
 	
+	public static int mouseX;
+	public static int mouseY;
+
 	
 	public Main() {
-		setPreferredSize(new Dimension(1000, 600));
+		setPreferredSize(new Dimension(900, 600));
 		setBackground(new Color(200, 0, 0));
-		
 		addKeyListener(this);
+		addMouseListener(this);
 		this.setFocusable(true);
 		
 		try {
 			for(int i = 0; i < 12; i++) {
 				playerImages.add(ImageIO.read(new File("runAnimation/" + (i+1) + ".png")));
 			}
+			screens[0] = ImageIO.read(new File("assets/gameScreens/titlescreen.png"));
+
 		}
 		catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		Thread thread = new Thread(this);
+		thread = new Thread(this);
 		thread.start();
 	}
 	
@@ -57,14 +67,20 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D) g;
-		
-		try {
-			Thread.sleep(60);
-			g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (menuState == 0) {
+			g2d.drawImage(screens[0], mapX, mapY, null);
+
 		}
+		else if (menuState > 0) {
+			try {
+				Thread.sleep(60);
+				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
 	
 		
 
@@ -74,48 +90,65 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public void run() {
 
 		while(true) {
-			try {
-				Thread.sleep(1000/20);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			if (menuState > 0) {
+				try {
+					Thread.sleep(1000/20);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				if(up) {
+					Player.key = 1;
+					playerY -= 10;
+					Player.run();
+				}
+				if(down) {
+					Player.key = 3;
+					playerY += 10;
+					Player.run();
+				}
+				if(left) {
+					Player.key = 2;
+					playerX -= 10;
+					Player.run();
+				}
+				if(right) {
+					Player.key = 4;
+					playerX += 10;
+					Player.run();
+				}
 			
-			if(up) {
-				Player.key = 1;
-				playerY -= 10;
-				Player.run();
-			}
-			if(down) {
-				Player.key = 3;
-				playerY += 10;
-				Player.run();
-			}
-			if(left) {
-				Player.key = 2;
-				playerX -= 10;
-				Player.run();
-			}
-			if(right) {
-				Player.key = 4;
-				playerX += 10;
-				Player.run();
 			}
 		}
+			
 	}
 
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
+	public boolean clickedWithin(Rectangle r) {
+		return r.contains(getMousePosition());
 		
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
+		mouseX = e.getX();
+		mouseY = e.getY();
+		if (clickedWithin(new Rectangle(142, 545, 169, 40))) {
+			menuState++;
+			System.out.println("clicked");
+			
+		}
+		
+		repaint();
+		
 		
 	}
-
+	
+	
+	
+	
+	@Override
+	public void mouseClicked(MouseEvent e) {}
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
