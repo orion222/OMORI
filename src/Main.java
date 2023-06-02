@@ -14,7 +14,6 @@ import java.util.*;
 public class Main extends JPanel implements KeyListener, MouseListener, Runnable{
 
 	boolean up, down, left, right; // movement in a direction
-	boolean legUp, legDown, legLeft, legRight; // determines which leg to display when running in the same diredction
 	ArrayList<BufferedImage> playerImages = new ArrayList<>(); // arraylist of player images
 	int playerIndex = 1; // which image to display of player
 	int playerX = 100, playerY = 100;
@@ -88,15 +87,16 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 
 	@Override
 	public void run() {
-
+		
 		while(true) {
+			//System.out.println("menuState");
+			try {
+				Thread.sleep(1000/20);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			if (menuState > 0) {
-				try {
-					Thread.sleep(1000/20);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 				
 				if(up) {
 					Player.key = 1;
@@ -118,6 +118,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					playerX += 10;
 					Player.run();
 				}
+		
+				
 			
 			}
 		}
@@ -133,13 +135,16 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public void mousePressed(MouseEvent e) {
 		mouseX = e.getX();
 		mouseY = e.getY();
-		if (clickedWithin(new Rectangle(142, 545, 169, 40))) {
-			menuState++;
-			System.out.println("clicked");
-			
-		}
 		
-		repaint();
+		if (menuState == 0) {
+			// play game
+			if (clickedWithin(new Rectangle(142, 545, 169, 40))) {
+				menuState = 1;
+				System.out.println("clicked");
+				
+			}			
+		}
+		repaint();	
 		
 		
 	}
@@ -169,33 +174,34 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 
 	@Override
 	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stub 
 		
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
 		int key = e.getKeyCode();
-
-		// w
-		if(key == 87) {
-			System.out.println("w");
-			up = true;
-		}
-		// a
-		else if(key == 65) {
-			System.out.println("a");
-			left = true;
-		}
-		// s
-		else if(key == 83) {
-			System.out.println("s");
-			down = true;
-		}
-		// d
-		else if(key == 68) {
-			System.out.println("d");
-			right = true;
+		if (menuState > 0) {
+			// w
+			if(key == 87) {
+				System.out.println("w");
+				up = true;
+			}
+			// a
+			else if(key == 65) {
+				System.out.println("a");
+				left = true;
+			}
+			// s
+			else if(key == 83) {
+				System.out.println("s");
+				down = true;
+			}
+			// d
+			else if(key == 68) {
+				System.out.println("d");
+				right = true;
+			}
 		}
 		repaint();
 		
@@ -205,32 +211,32 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public void keyReleased(KeyEvent e) {
 		// TODO Auto-generated method stub
 		int key = e.getKeyCode();
-
-		// w
-		if(key == 87) {
-			System.out.println("w releaes");
-			up = false;
-			playerIndex = 10;
+		if (menuState > 0) {
+			// w
+			if(key == 87) {
+				System.out.println("w releaes");
+				up = false;
+				playerIndex = 10;
+			}
+			// a
+			else if(key == 65) {
+				System.out.println("a relaes");
+				left = false;
+				playerIndex = 4;
+			}
+			// s
+			else if(key == 83) {
+				System.out.println("s release");
+				down = false;
+				playerIndex = 1;
+			}
+			// d
+			else if(key == 68) {
+				System.out.println("d release");
+				right = false;
+				playerIndex = 7;
+			}
 		}
-		// a
-		else if(key == 65) {
-			System.out.println("a relaes");
-			left = false;
-			playerIndex = 4;
-		}
-		// s
-		else if(key == 83) {
-			System.out.println("s release");
-			down = false;
-			playerIndex = 1;
-		}
-		// d
-		else if(key == 68) {
-			System.out.println("d release");
-			right = false;
-			playerIndex = 7;
-		}
-		
 		repaint();
 	}
 }

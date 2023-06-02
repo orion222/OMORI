@@ -26,7 +26,7 @@ public class Player extends JPanel implements Runnable{
 
 	@Override
 	public void run() {
-
+		
 		// TODO Auto-generated method stub
 		if(key == 1) {
 			if(legUp) game.playerIndex = 9;
@@ -50,6 +50,7 @@ public class Player extends JPanel implements Runnable{
 		}
 		
 		game.repaint();
+
 	}
 
 }
