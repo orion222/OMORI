@@ -14,6 +14,11 @@ import java.util.*;
 
 public class Player extends JPanel implements Runnable{
 
+	
+	private int HP;
+	private ArrayList<String> attacks = new ArrayList<>();
+	private ArrayList<String> items = new ArrayList<>();
+	
 	public Main game;
 	
 

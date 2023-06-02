@@ -14,7 +14,7 @@ import java.util.*;
 public class Main extends JPanel implements KeyListener, MouseListener, Runnable{
 
 	boolean up, down, left, right; // movement in a direction
-	ArrayList<BufferedImage> playerImages = new ArrayList<>(); // arraylist of player images
+	ArrayList<Image> playerImages = new ArrayList<>(); // arraylist of player images
 	int playerIndex = 1; // which image to display of player
 	int playerX = 100, playerY = 100;
 	
@@ -38,7 +38,12 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		
 		try {
 			for(int i = 0; i < 12; i++) {
-				playerImages.add(ImageIO.read(new File("runAnimation/" + (i+1) + ".png")));
+				Image image = ImageIO.read(new File("runAnimation/" + (i+1) + ".png"));
+				if(i >= 3 && i <= 8) {
+					Image newImage = image.getScaledInstance(125, 132,  java.awt.Image.SCALE_SMOOTH);
+					image = newImage;
+				}
+				playerImages.add(image);
 			}
 			screens[0] = ImageIO.read(new File("assets/gameScreens/titlescreen.png"));
 
@@ -85,11 +90,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 
 	}
 
-	@Override
 	public void run() {
 		
 		while(true) {
-			//System.out.println("menuState");
 			try {
 				Thread.sleep(1000/20);
 			} catch (InterruptedException e) {
