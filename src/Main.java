@@ -16,7 +16,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	boolean up, down, left, right; // movement in a direction
 	ArrayList<BufferedImage> playerImages = new ArrayList<>(); // arraylist of player images
 	int playerIndex = 1; // which image to display of player
-	int playerX = 100, playerY = 100;
+	int playerX = 400, playerY = 250;
 	
 	Player Player = new Player(this);
 	public static int menuState = 0;
@@ -41,6 +41,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				playerImages.add(ImageIO.read(new File("runAnimation/" + (i+1) + ".png")));
 			}
 			screens[0] = ImageIO.read(new File("assets/gameScreens/titlescreen.png"));
+			screens[1] = ImageIO.read(new File("assets/gameScreens/whitespace.png"));
 
 		}
 		catch (IOException e) {
@@ -67,12 +68,13 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D) g;
 		if (menuState == 0) {
-			g2d.drawImage(screens[0], mapX, mapY, null);
+			g2d.drawImage(screens[0], 0, 0, null);
 
 		}
 		else if (menuState > 0) {
 			try {
 				Thread.sleep(60);
+				g2d.drawImage(screens[1], mapX, mapY, null);
 				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -100,22 +102,26 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				
 				if(up) {
 					Player.key = 1;
-					playerY -= 10;
+					// playerY -= 10;
+					mapY += 10;
 					Player.run();
 				}
 				if(down) {
 					Player.key = 3;
-					playerY += 10;
+					// playerY += 10;
+					mapY -= 10;
 					Player.run();
 				}
 				if(left) {
 					Player.key = 2;
-					playerX -= 10;
+					// playerX -= 10;
+					mapX += 10;
 					Player.run();
 				}
 				if(right) {
 					Player.key = 4;
-					playerX += 10;
+					// playerX += 10;
+					mapX -= 10;
 					Player.run();
 				}
 		
@@ -141,6 +147,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			if (clickedWithin(new Rectangle(142, 545, 169, 40))) {
 				menuState = 1;
 				System.out.println("clicked");
+				mapX = -840;
+				mapY = -616;
 				
 			}			
 		}
