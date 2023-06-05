@@ -39,10 +39,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		try {
 			for(int i = 0; i < 12; i++) {
 				Image image = ImageIO.read(new File("runAnimation/" + (i+1) + ".png"));
-				if(i >= 3 && i <= 8) {
-					Image newImage = image.getScaledInstance(125, 132,  java.awt.Image.SCALE_SMOOTH);
-					image = newImage;
-				}
+				Image newImage = image.getScaledInstance(63, 66,  java.awt.Image.SCALE_SMOOTH);
+				image = newImage;
+				
 				playerImages.add(image);
 			}
 			screens[0] = ImageIO.read(new File("assets/gameScreens/titlescreen.png"));
@@ -102,7 +101,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				e.printStackTrace();
 			}
 			if (menuState > 0) {
-				
+				 
 				if(up) {
 					Player.key = 1;
 					// playerY -= 10;
@@ -127,6 +126,22 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					mapX -= 10;
 					Player.run();
 				}
+				
+				// if they have left 1 quadrant of the whitespace
+				if (menuState == 1 && !within(new Rectangle(1000, 1000, 1000, 1000), new Point(-1 * mapX, -1 * mapY))) {
+					if (mapY > -1000) {
+						mapY = -2000;
+					}
+					if (mapY < -2000) {
+						mapY = -1000;
+					}
+					if (mapX > -1000) {
+						mapX = -2000;
+					}
+					if (mapX < -2000) {
+						mapX = -1000;
+					}
+				}
 		
 				
 			
@@ -135,8 +150,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			
 	}
 
-	public boolean clickedWithin(Rectangle r) {
-		return r.contains(getMousePosition());
+	public boolean within(Rectangle r, Point p) {
+		return r.contains(p);
 		
 	}
 
@@ -147,11 +162,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		
 		if (menuState == 0) {
 			// play game
-			if (clickedWithin(new Rectangle(142, 545, 169, 40))) {
+			if (within(new Rectangle(142, 545, 169, 40), getMousePosition())) {
 				menuState = 1;
 				System.out.println("clicked");
-				mapX = -840;
-				mapY = -616;
+				mapX = -1050;
+				mapY = -1200;
 				
 			}			
 		}
