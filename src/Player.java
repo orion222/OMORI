@@ -53,7 +53,7 @@ public class Player extends JPanel implements Runnable{
 			else game.playerIndex = 8;
 			legRight = !legRight;
 		}
-		
+		System.out.println(game.mapX + " " + game.mapY);
 		game.repaint();
 
 	}

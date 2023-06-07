@@ -27,8 +27,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	
 	public static int mouseX;
 	public static int mouseY;
+	public static int windowWidth = 900;
+	public static int windowHeight = 600;
 
-	
+	static int charHeight = 66;
+	static int charWidth = 63;
 	public Main() {
 		setPreferredSize(new Dimension(900, 600));
 		setBackground(new Color(200, 0, 0));
@@ -39,13 +42,13 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		try {
 			for(int i = 0; i < 12; i++) {
 				Image image = ImageIO.read(new File("runAnimation/" + (i+1) + ".png"));
-				Image newImage = image.getScaledInstance(63, 66,  java.awt.Image.SCALE_SMOOTH);
+				Image newImage = image.getScaledInstance(charWidth, charHeight,  java.awt.Image.SCALE_SMOOTH);
 				image = newImage;
 				
 				playerImages.add(image);
 			}
 			screens[0] = ImageIO.read(new File("assets/gameScreens/titlescreen.png"));
-			screens[1] = ImageIO.read(new File("assets/gameScreens/whitespace.png"));
+			screens[1] = ImageIO.read(new File("assets/gameScreens/whitespace2.png"));
 
 		}
 		catch (IOException e) {
@@ -78,7 +81,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		else if (menuState > 0) {
 			try {
 				Thread.sleep(60);
-				g2d.drawImage(screens[1], mapX, mapY, null);
+				g2d.drawImage(screens[1], -1 * mapX, -1 * mapY, null);
 				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -105,41 +108,41 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				if(up) {
 					Player.key = 1;
 					// playerY -= 10;
-					mapY += 10;
+					mapY -= 10;
 					Player.run();
 				}
 				if(down) {
 					Player.key = 3;
 					// playerY += 10;
-					mapY -= 10;
+					mapY += 10;
 					Player.run();
 				}
 				if(left) {
 					Player.key = 2;
 					// playerX -= 10;
-					mapX += 10;
+					mapX -= 10;
 					Player.run();
 				}
 				if(right) {
 					Player.key = 4;
 					// playerX += 10;
-					mapX -= 10;
+					mapX += 10;
 					Player.run();
 				}
 				
 				// if they have left 1 quadrant of the whitespace
-				if (menuState == 1 && !within(new Rectangle(1000, 1000, 1000, 1000), new Point(-1 * mapX, -1 * mapY))) {
-					if (mapY > -1000) {
-						mapY = -2000;
+				if (menuState == 1) {
+					if (mapY < 600) {
+						mapY = 1800;
 					}
-					if (mapY < -2000) {
-						mapY = -1000;
+					if (mapY > 1800) {
+						mapY = 600;
 					}
-					if (mapX > -1000) {
-						mapX = -2000;
+					if (mapX < 450) {
+						mapX = 1650;
 					}
-					if (mapX < -2000) {
-						mapX = -1000;
+					if (mapX > 1650) {
+						mapX = 450;
 					}
 				}
 		
@@ -165,8 +168,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			if (within(new Rectangle(142, 545, 169, 40), getMousePosition())) {
 				menuState = 1;
 				System.out.println("clicked");
-				mapX = -1050;
-				mapY = -1200;
+				mapX = 1050;
+				mapY = 1200;
 				
 			}			
 		}
