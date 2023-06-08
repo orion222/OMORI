@@ -32,7 +32,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 
 	static int charHeight = 66;
 	static int charWidth = 63;
+	static int charSpeed = 2;
 	public static ArrayList<Rectangle>[] interactables = new ArrayList[4];
+	public static ArrayList<Rectangle>[] bounds = new ArrayList[4];
 	public Main() {
 		setPreferredSize(new Dimension(900, 600));
 		setBackground(new Color(200, 0, 0));
@@ -58,10 +60,13 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		}
 		for (int i = 0; i < 4; i++) {
 			interactables[i] = new ArrayList<Rectangle>();
+			bounds[i] = new ArrayList<Rectangle>();
 		}
 		interactables[1].add(new Rectangle(980, 1120, 40, 80)); // the pills
 		interactables[1].add(new Rectangle(1140, 1120, 60, 80)); // the book
 		interactables[1].add(new Rectangle(980, 1260, 60, 70)); // the cat
+		
+		bounds[1].addAll(interactables[1]);
 		
 		thread = new Thread(this);
 		thread.start();
@@ -87,9 +92,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		}
 		else if (menuState > 0) {
 			try {
-				Thread.sleep(60);
+				Thread.sleep(17);
 				g2d.drawImage(screens[1], -1 * mapX, -1 * mapY, null);
-				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
+				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null); 
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -102,48 +107,52 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	}
 
 	public void run() {
-		
 		while(true) {
 			try {
-				Thread.sleep(1000/20);
+				Thread.sleep(17);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			int posX = (menuState == 1) ? mapX: playerX;
+			int posY = (menuState == 1) ? mapY: playerY;			
 			if (menuState > 0) {
-				 
-				if(up) {
+				if(up && withinBounds(bounds[menuState], new Point(posX, posY - charSpeed))) {
 					Player.key = 1;
 					// playerY -= 10;
-					mapY -= 10;
+					mapY -= charSpeed;
 					Player.run();
+
 				}
-				if(down) {
+				if(down && withinBounds(bounds[menuState], new Point(posX, posY + charSpeed))) {
 					Player.key = 3;
 					// playerY += 10;
-					mapY += 10;
+					mapY += charSpeed;
 					Player.run();
+
 				}
-				if(left) {
+				if(left && withinBounds(bounds[menuState], new Point(posX - charSpeed, posY))) {
 					Player.key = 2;
 					// playerX -= 10;
-					mapX -= 10;
+					mapX -= charSpeed;
 					Player.run();
+
 				}
-				if(right) {
+				if(right && withinBounds(bounds[menuState], new Point(posX + charSpeed, posY))) {
 					Player.key = 4;
 					// playerX += 10;
-					mapX += 10;
+					mapX += charSpeed;
 					Player.run();
+
 				}
 				
 				// if they have left 1 quadrant of the whitespace
 				if (menuState == 1) {
-					if (mapY < 600) {
-						mapY = 1800;
+					if (mapY < 800) {
+						mapY = 1600;
 					}
-					if (mapY > 1800) {
-						mapY = 600;
+					if (mapY > 1600) {
+						mapY = 800;
 					}
 					if (mapX < 450) {
 						mapX = 1650;
@@ -151,13 +160,45 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					if (mapX > 1650) {
 						mapX = 450;
 					}
+					
 				}
+				
 			}
 		}
 	}
 
 	public boolean within(Rectangle r, Point p) {
-		return r.contains(p);
+		if (r.x < p.x && p.x < r.x + r.width) {
+			if (r.y < p.y && p.y < r.y + r.height) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	// this looks the same BUT there is equals.
+	// we need this because within() wouldn't work without the equals.
+	// the character doesn't move into obstacles, but they can
+	// go right up to the side as defined by their coordinates in the constructor.
+	// we need interact() to see if the character is at the side
+	
+	
+	public boolean interact(Rectangle r, Point p) {
+		if (r.x <= p.x && p.x <= r.x + r.width) {
+			if (r.y <= p.y && p.y <= r.y + r.height) {
+				return true;
+			}
+		}
+		return false;
+	}
+	public boolean withinBounds(ArrayList<Rectangle> r, Point p) {
+		
+		for (Rectangle i: r) {
+			if (within(i, p)) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 
@@ -215,28 +256,26 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		int key = e.getKeyCode();
 		if (menuState > 0) {
 			// w
-			if(key == 87) {
-				System.out.println("w");
+			if(key == 38) {
 				up = true;
 			}
 			// a
-			else if(key == 65) {
-				System.out.println("a");
+			else if(key == 37) {
 				left = true;
 			}
 			// s
-			else if(key == 83) {
-				System.out.println("s");
+			else if(key == 40) {
 				down = true;
 			}
 			// d
-			else if(key == 68) {
-				System.out.println("d");
+			else if(key == 39) {
 				right = true;
 			}
 			else if (key == 90) {
+				int a = (menuState == 1) ? mapX: playerX;
+				int b = (menuState == 1) ? mapY: playerY;
 				for (Rectangle i: interactables[menuState]) {
-					if (within(i, new Point(mapX, mapY))) {
+					if (interact(i, new Point(a, b))) {
 						System.out.println("Interacted");
 					}
 				}
@@ -252,25 +291,25 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		int key = e.getKeyCode();
 		if (menuState > 0) {
 			// w
-			if(key == 87) {
+			if(key == 38) {
 				System.out.println("w releaes");
 				up = false;
 				playerIndex = 10;
 			}
 			// a
-			else if(key == 65) {
+			else if(key == 37) {
 				System.out.println("a relaes");
 				left = false;
 				playerIndex = 4;
 			}
 			// s
-			else if(key == 83) {
+			else if(key == 40) {
 				System.out.println("s release");
 				down = false;
 				playerIndex = 1;
 			}
 			// d
-			else if(key == 68) {
+			else if(key == 39) {
 				System.out.println("d release");
 				right = false;
 				playerIndex = 7;
