@@ -32,6 +32,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 
 	static int charHeight = 66;
 	static int charWidth = 63;
+	public static ArrayList<Rectangle>[] interactables = new ArrayList[4];
 	public Main() {
 		setPreferredSize(new Dimension(900, 600));
 		setBackground(new Color(200, 0, 0));
@@ -55,6 +56,12 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		for (int i = 0; i < 4; i++) {
+			interactables[i] = new ArrayList<Rectangle>();
+		}
+		interactables[1].add(new Rectangle(980, 1120, 40, 80)); // the pills
+		interactables[1].add(new Rectangle(1140, 1120, 60, 80)); // the book
+		interactables[1].add(new Rectangle(980, 1260, 60, 70)); // the cat
 		
 		thread = new Thread(this);
 		thread.start();
@@ -145,18 +152,14 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						mapX = 450;
 					}
 				}
-		
-				
-			
 			}
 		}
-			
 	}
 
 	public boolean within(Rectangle r, Point p) {
 		return r.contains(p);
-		
 	}
+	
 
 	@Override
 	public void mousePressed(MouseEvent e) {
@@ -230,6 +233,13 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			else if(key == 68) {
 				System.out.println("d");
 				right = true;
+			}
+			else if (key == 90) {
+				for (Rectangle i: interactables[menuState]) {
+					if (within(i, new Point(mapX, mapY))) {
+						System.out.println("Interacted");
+					}
+				}
 			}
 		}
 		repaint();
