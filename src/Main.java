@@ -35,6 +35,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	static int charSpeed = 2;
 	public static ArrayList<Rectangle>[] interactables = new ArrayList[4];
 	public static ArrayList<Rectangle>[] bounds = new ArrayList[4];
+	
+	static Font speakingFont;
 	public Main() {
 		setPreferredSize(new Dimension(900, 600));
 		setBackground(new Color(200, 0, 0));
@@ -52,9 +54,13 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			}
 			screens[0] = ImageIO.read(new File("assets/gameScreens/titlescreen.png"));
 			screens[1] = ImageIO.read(new File("assets/gameScreens/whitespace2.png"));
-
+			
+			speakingFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/fonts/OMORI_GAME2.ttf")).deriveFont(50f);
 		}
 		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FontFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -86,6 +92,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D) g;
+		g2d.setFont(speakingFont);
 		if (menuState == 0) {
 			g2d.drawImage(screens[0], 0, 0, null);
 
@@ -94,7 +101,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			try {
 				Thread.sleep(17);
 				g2d.drawImage(screens[1], -1 * mapX, -1 * mapY, null);
-				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null); 
+				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
