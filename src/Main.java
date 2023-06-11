@@ -1,6 +1,6 @@
 
 import javax.swing.*;
-
+import javax.swing.Timer;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -11,7 +11,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.util.*;
 
-public class Main extends JPanel implements KeyListener, MouseListener, Runnable{
+public class Main extends JPanel implements KeyListener, MouseListener, Runnable, ActionListener{
 
 	boolean up, down, left, right; // movement in a direction
 	ArrayList<Image> playerImages = new ArrayList<>(); // arraylist of player images
@@ -34,9 +34,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	static int charWidth = 63;
 	static int charSpeed = 2;
 	public static ArrayList<Rectangle>[] interactables = new ArrayList[4];
-	public static ArrayList<Rectangle>[] bounds = new ArrayList[4];
+	public static ArrayList<Rectangle>[][] bounds = new ArrayList[4][2];
 	
 	static Font speakingFont;
+	static Timer timer;
 	public Main() {
 		setPreferredSize(new Dimension(900, 600));
 		setBackground(new Color(200, 0, 0));
@@ -66,16 +67,20 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		}
 		for (int i = 0; i < 4; i++) {
 			interactables[i] = new ArrayList<Rectangle>();
-			bounds[i] = new ArrayList<Rectangle>();
+			for (int x = 0; x < 2; x++) {
+				bounds[i][x] = new ArrayList<Rectangle>();
+			}
 		}
 		interactables[1].add(new Rectangle(980, 1120, 40, 80)); // the pills
 		interactables[1].add(new Rectangle(1140, 1120, 60, 80)); // the book
 		interactables[1].add(new Rectangle(980, 1260, 60, 70)); // the cat
 		
-		bounds[1].addAll(interactables[1]);
+		bounds[1][0] = interactables[1];
+		bounds[1][1].add(new Rectangle(0, 0, 3000, 3000));
 		
 		thread = new Thread(this);
 		thread.start();
+		timer = new Timer(250, this);
 	}
 	
 	public static void main(String[] args) {
@@ -128,28 +133,33 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					Player.key = 1;
 					// playerY -= 10;
 					mapY -= charSpeed;
-					Player.run();
+					timer.start();
+
 
 				}
 				if(down && withinBounds(bounds[menuState], new Point(posX, posY + charSpeed))) {
 					Player.key = 3;
 					// playerY += 10;
 					mapY += charSpeed;
-					Player.run();
+					timer.start();
+
+
 
 				}
 				if(left && withinBounds(bounds[menuState], new Point(posX - charSpeed, posY))) {
 					Player.key = 2;
 					// playerX -= 10;
 					mapX -= charSpeed;
-					Player.run();
+					timer.start();
+
+
 
 				}
 				if(right && withinBounds(bounds[menuState], new Point(posX + charSpeed, posY))) {
 					Player.key = 4;
 					// playerX += 10;
 					mapX += charSpeed;
-					Player.run();
+					timer.start();
 
 				}
 				
@@ -198,14 +208,22 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		}
 		return false;
 	}
-	public boolean withinBounds(ArrayList<Rectangle> r, Point p) {
+	public boolean withinBounds(ArrayList<Rectangle>[] r, Point p) {
 		
-		for (Rectangle i: r) {
+		// if we are on top of an interactable object
+		for (Rectangle i: r[0]) {
 			if (within(i, p)) {
 				return false;
 			}
 		}
-		return true;
+		// if we are within the boundaries
+		for (Rectangle i: r[1]) {
+			if (within(i, p)) {
+				return true;
+			}
+		}
+		// otherwise we must be out of bounds
+		return false;
 	}
 	
 
@@ -269,14 +287,17 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			// a
 			else if(key == 37) {
 				left = true;
+
 			}
 			// s
 			else if(key == 40) {
 				down = true;
+
 			}
 			// d
 			else if(key == 39) {
 				right = true;
+
 			}
 			else if (key == 90) {
 				int a = (menuState == 1) ? mapX: playerX;
@@ -321,7 +342,14 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				right = false;
 				playerIndex = 7;
 			}
+			timer.stop();
 		}
 		repaint();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
+		Player.run();
 	}
 }

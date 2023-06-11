@@ -2,7 +2,7 @@
 
 import javax.swing.*;
 
-
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -12,13 +12,14 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.util.*;
 
-public class Player extends JPanel implements Runnable{
+public class Player extends JPanel implements Runnable, ActionListener{
 
 	
 	private int HP;
 	private ArrayList<String> attacks = new ArrayList<>();
 	private ArrayList<String> items = new ArrayList<>();
-	
+	public Timer timer = new Timer(500, this);
+
 	public Main game;
 	
 
@@ -28,6 +29,12 @@ public class Player extends JPanel implements Runnable{
 
 	int key = 0;
 	boolean legUp, legDown, legLeft, legRight;
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		// TODO Auto-generated method stub
+		run();
+	}
+	
 
 	@Override
 	public void run() {
