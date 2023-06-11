@@ -34,8 +34,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	static int speakingInd = 0;
 	static boolean[] scriptRead = new boolean[4];
 	static Text[] mainScript = new Text[4];
+	static BufferedImage selector;
 	static ArrayList<Text>[] interactablesScript = new ArrayList[4];
-	static int interactableScript;
+	static int interactableScript = -1;
+	static boolean choosing = false;
+	static boolean choice = true;
 	
 	static int charHeight = 66;
 	static int charWidth = 63;
@@ -66,10 +69,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			speechBoxes[0] = ImageIO.read(new File("assets/scripts/speechBox.png"));
 			speechBoxes[1] = ImageIO.read(new File("assets/scripts/sunny.png"));
 			speechBoxes[2] = ImageIO.read(new File("assets/scripts/kel.png"));
+			selector = ImageIO.read(new File("assets/scripts/select.png"));
 			speakingFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/fonts/OMORI_GAME2.ttf")).deriveFont(50f);
 			
 			// script reading
-			mainScript[1] = new Text(new BufferedReader(new FileReader("assets/scripts/script1.txt")));
+			mainScript[1] = new Text(new BufferedReader(new FileReader("assets/scripts/script1.txt")), false);
 		}
 		catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -93,9 +97,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		interactables[1].add(new Rectangle(1140, 1120, 60, 80)); // the book
 		interactables[1].add(new Rectangle(980, 1260, 60, 70)); // the cat
 		
-		interactablesScript[1].add(new Text("pills. Take them?"));
-		interactablesScript[1].add(new Text("read"));
-		interactablesScript[1].add(new Text("meow."));
+		interactablesScript[1].add(new Text("pills. Take them?", true));
+		interactablesScript[1].add(new Text("read", false));
+		interactablesScript[1].add(new Text("meow. GOOD MORNING", false));
 
 		
 		bounds[1][0] = interactables[1];
@@ -150,12 +154,24 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						speaking = false;
 						speakingInd = 0;
 						scriptRead[menuState] = true;
+						choosing = false;
+						if (interactableScript == 0 && choice) {
+							menuState++;
+							System.out.println("new world");
+						}
+						choice = true;
 					}
 					else {
-						System.out.println(curSlides.toString());
 						g2d.drawString(curSlides.get(speakingInd)[0], 25, 480);
 						g2d.drawString(curSlides.get(speakingInd)[1], 25, 520);
-						g2d.drawString(curSlides.get(speakingInd)[2], 25, 560);						
+						g2d.drawString(curSlides.get(speakingInd)[2], 25, 560);			
+						System.out.println(choosing);
+						if (speakingInd == cur.getSlidesSize() - 1 && choosing) {			
+							System.out.println("wagnan");
+							int posx = (choice) ? 200: 525;
+							g2d.drawImage(selector, posx, 540, null);
+						
+						}
 					}
 				}
 
@@ -333,35 +349,45 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		int key = e.getKeyCode();
 		if (menuState > 0) {
 			// w
-			if(key == 38) {
+			if(key == 38 && !speaking) {
 				up = true;
 			}
 			// a
 			else if(key == 37) {
-				left = true;
+				
+				if (speaking) choice = true;
+				
+				else left = true;
+
 
 			}
 			// s
-			else if(key == 40) {
+			else if(key == 40 && !speaking) {
 				down = true;
 
 			}
 			// d
 			else if(key == 39) {
-				right = true;
+				if (speaking) choice = false;
+				else right = true;
 
 			}
 			// z interact
-			else if (key == 90) {
+			else if (key == 90 && !speaking) {
 				int a = (menuState == 1) ? mapX: playerX;
 				int b = (menuState == 1) ? mapY: playerY;
 				for (int i = 0; i < interactables[menuState].size(); i++) {
 					if (interact(interactables[menuState].get(i), new Point(a, b))) {
 						System.out.println("Interacted");
-						if (interactablesScript[i] != null) {
+						
+						if (interactablesScript[menuState].get(i) != null) {
 							speaking = true;
 							interactableScript = i;
 							System.out.println("yay");
+							// if the interactable prompts the user to make a choice
+							if (interactablesScript[menuState].get(i).getChoice()) {
+								choosing = true;
+							}
 						}
 					}
 				}
@@ -384,25 +410,26 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		int key = e.getKeyCode();
 		if (menuState > 0) {
 			// w
-			if(key == 38) {
+			if(key == 38 && !speaking) {
 				System.out.println("w releaes");
 				up = false;
 				playerIndex = 10;
 			}
 			// a
 			else if(key == 37) {
+				
 				System.out.println("a relaes");
 				left = false;
 				playerIndex = 4;
 			}
 			// s
-			else if(key == 40) {
+			else if(key == 40 && !speaking) {
 				System.out.println("s release");
 				down = false;
 				playerIndex = 1;
 			}
 			// d
-			else if(key == 39) {
+			else if(key == 39 && !speaking) {
 				System.out.println("d release");
 				right = false;
 				playerIndex = 7;

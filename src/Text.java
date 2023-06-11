@@ -1,11 +1,13 @@
 import java.util.*;
 import java.io.*;
 public class Text {
-	// EACH SLIDE HAS MAX 31 CHARS
-	private ArrayList<String[]> slides = new ArrayList<String[]>();
 	
-	public Text(BufferedReader file) {
+	private ArrayList<String[]> slides = new ArrayList<String[]>();
+	private boolean choice = false;
+	
+	public Text(BufferedReader file, boolean option) {
 		try {
+			this.choice = option;
 			String s;
 			StringBuilder line = new StringBuilder("");
 			
@@ -47,7 +49,9 @@ public class Text {
 			System.out.println("io exception");
 		}
 	}
-	public Text(String s) {
+	public Text(String s, boolean option) {
+		this.choice = option;
+
 		StringBuilder line = new StringBuilder("");
 		String[] slide = new String[] {"", "", ""};
 		int ind = 0;
@@ -76,6 +80,9 @@ public class Text {
 			}
 		}
 		slide[lineInd] = line.toString();
+		if (option) {
+			slide[2] = "                  YES                  NO";
+		}
 		slides.add(slide);
 
 	}
@@ -86,5 +93,11 @@ public class Text {
 	}
 	public int getSlidesSize() {
 		return slides.size();
+	}
+	public boolean getChoice() {
+		return choice;
+	}
+	public String toString() {
+		return slides.toString();
 	}
 }
