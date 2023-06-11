@@ -30,15 +30,18 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public static int windowWidth = 900;
 	public static int windowHeight = 600;
 	
-	static boolean speaking = false;
+	static boolean speaking = true;
 	static int speakingInd = 0;
 	static boolean[] scriptRead = new boolean[4];
-	static Text[] script = new Text[4];
+	static Text[] mainScript = new Text[4];
+	static ArrayList<Text>[] interactablesScript = new ArrayList[4];
+	static int interactableScript;
 	
 	static int charHeight = 66;
 	static int charWidth = 63;
 	static int charSpeed = 2;
 	public static ArrayList<Rectangle>[] interactables = new ArrayList[4];
+
 	public static ArrayList<Rectangle>[][] bounds = new ArrayList[4][2];
 	
 	static Font speakingFont;
@@ -60,9 +63,13 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			}
 			screens[0] = ImageIO.read(new File("assets/gameScreens/titlescreen.png"));
 			screens[1] = ImageIO.read(new File("assets/gameScreens/whitespace2.png"));
+			speechBoxes[0] = ImageIO.read(new File("assets/scripts/speechBox.png"));
 			speechBoxes[1] = ImageIO.read(new File("assets/scripts/sunny.png"));
 			speechBoxes[2] = ImageIO.read(new File("assets/scripts/kel.png"));
 			speakingFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/fonts/OMORI_GAME2.ttf")).deriveFont(50f);
+			
+			// script reading
+			mainScript[1] = new Text(new BufferedReader(new FileReader("assets/scripts/script1.txt")));
 		}
 		catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -74,11 +81,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		}
 		
 		
-		// script reading
-		script[1] = new Text("assets/scripts/script1.txt");
 
 		for (int i = 0; i < 4; i++) {
 			interactables[i] = new ArrayList<Rectangle>();
+			interactablesScript[i] = new ArrayList<Text>();
 			for (int x = 0; x < 2; x++) {
 				bounds[i][x] = new ArrayList<Rectangle>();
 			}
@@ -86,6 +92,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		interactables[1].add(new Rectangle(980, 1120, 40, 80)); // the pills
 		interactables[1].add(new Rectangle(1140, 1120, 60, 80)); // the book
 		interactables[1].add(new Rectangle(980, 1260, 60, 70)); // the cat
+		
+		interactablesScript[1].add(new Text("pills. Take them?"));
+		interactablesScript[1].add(new Text("read"));
+		interactablesScript[1].add(new Text("meow."));
+
 		
 		bounds[1][0] = interactables[1];
 		bounds[1][1].add(new Rectangle(0, 0, 3000, 3000));
@@ -121,20 +132,30 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				g2d.drawImage(screens[1], -1 * mapX, -1 * mapY, null);
 				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
 				
-				if (!scriptRead[menuState]) {
-					if (speakingInd == script[menuState].getSlidesSize()) {
+				if (speaking) {
+					
+					Text cur = null;
+					ArrayList<String[]> curSlides = null;
+					if (!scriptRead[menuState]) {
+						g2d.drawImage(speechBoxes[menuState], 0, 260, null);
+						cur = mainScript[menuState];
+						curSlides = cur.getSlides();
+					}
+					else {
+						g2d.drawImage(speechBoxes[0], 0, 434, null);
+						cur = interactablesScript[menuState].get(interactableScript);
+						curSlides = cur.getSlides();
+					}
+					if (speakingInd == cur.getSlidesSize()) {
 						speaking = false;
 						speakingInd = 0;
 						scriptRead[menuState] = true;
 					}
 					else {
-						speaking = true;
-						g2d.drawImage(speechBoxes[1], 0, 260, null);
-						ArrayList<String[]> cur = script[menuState].getSlides();
-						System.out.println(script[menuState].getSlidesSize());
-						g2d.drawString(cur.get(speakingInd)[0], 25, 480);
-						g2d.drawString(cur.get(speakingInd)[1], 25, 520);
-						g2d.drawString(cur.get(speakingInd)[2], 25, 560);						
+						System.out.println(curSlides.toString());
+						g2d.drawString(curSlides.get(speakingInd)[0], 25, 480);
+						g2d.drawString(curSlides.get(speakingInd)[1], 25, 520);
+						g2d.drawString(curSlides.get(speakingInd)[2], 25, 560);						
 					}
 				}
 
@@ -334,9 +355,14 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			else if (key == 90) {
 				int a = (menuState == 1) ? mapX: playerX;
 				int b = (menuState == 1) ? mapY: playerY;
-				for (Rectangle i: interactables[menuState]) {
-					if (interact(i, new Point(a, b))) {
+				for (int i = 0; i < interactables[menuState].size(); i++) {
+					if (interact(interactables[menuState].get(i), new Point(a, b))) {
 						System.out.println("Interacted");
+						if (interactablesScript[i] != null) {
+							speaking = true;
+							interactableScript = i;
+							System.out.println("yay");
+						}
 					}
 				}
 			}
