@@ -33,6 +33,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	static boolean speaking = false;
 	static int speakingInd = 0;
 	static boolean[] scriptRead = new boolean[4];
+	static Text[] script = new Text[4];
+	
 	static int charHeight = 66;
 	static int charWidth = 63;
 	static int charSpeed = 2;
@@ -70,6 +72,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		
+		// script reading
+		script[1] = new Text("assets/scripts/script1.txt");
 
 		for (int i = 0; i < 4; i++) {
 			interactables[i] = new ArrayList<Rectangle>();
@@ -104,6 +110,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setFont(speakingFont);
+		g2d.setColor(new Color(255, 255, 255));
 		if (menuState == 0) {
 			g2d.drawImage(screens[0], 0, 0, null);
 
@@ -115,7 +122,20 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
 				
 				if (!scriptRead[menuState]) {
-					g2d.drawImage(speechBoxes[1], 0, 260, null);
+					if (speakingInd == script[menuState].getSlidesSize()) {
+						speaking = false;
+						speakingInd = 0;
+						scriptRead[menuState] = true;
+					}
+					else {
+						speaking = true;
+						g2d.drawImage(speechBoxes[1], 0, 260, null);
+						ArrayList<String[]> cur = script[menuState].getSlides();
+						System.out.println(script[menuState].getSlidesSize());
+						g2d.drawString(cur.get(speakingInd)[0], 25, 480);
+						g2d.drawString(cur.get(speakingInd)[1], 25, 520);
+						g2d.drawString(cur.get(speakingInd)[2], 25, 560);						
+					}
 				}
 
 			} catch (InterruptedException e) {
@@ -310,6 +330,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				right = true;
 
 			}
+			// z interact
 			else if (key == 90) {
 				int a = (menuState == 1) ? mapX: playerX;
 				int b = (menuState == 1) ? mapY: playerY;
@@ -317,6 +338,13 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					if (interact(i, new Point(a, b))) {
 						System.out.println("Interacted");
 					}
+				}
+			}
+			// x flip page / script
+			else if (key == 88) {
+				if (speaking) {
+					speakingInd++;
+					System.out.println('x');
 				}
 			}
 		}
