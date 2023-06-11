@@ -62,7 +62,6 @@ public class Player extends JPanel implements Runnable, ActionListener{
 		}
 		System.out.println(game.mapX + " " + game.mapY);
 		game.repaint();
-
 	}
 
 }

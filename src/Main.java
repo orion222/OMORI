@@ -24,12 +24,15 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public static int mapX = 0;
 	public static int mapY = 0;	
 	public static BufferedImage[] screens = new BufferedImage[5];
-	
+	public static BufferedImage[] speechBoxes = new BufferedImage[3];
 	public static int mouseX;
 	public static int mouseY;
 	public static int windowWidth = 900;
 	public static int windowHeight = 600;
-
+	
+	static boolean speaking = false;
+	static int speakingInd = 0;
+	static boolean[] scriptRead = new boolean[4];
 	static int charHeight = 66;
 	static int charWidth = 63;
 	static int charSpeed = 2;
@@ -47,7 +50,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		
 		try {
 			for(int i = 0; i < 12; i++) {
-				Image image = ImageIO.read(new File("runAnimation/" + (i+1) + ".png"));
+				Image image = ImageIO.read(new File("assets/runAnimation/" + (i+1) + ".png"));
 				Image newImage = image.getScaledInstance(charWidth, charHeight,  java.awt.Image.SCALE_SMOOTH);
 				image = newImage;
 				
@@ -55,16 +58,19 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			}
 			screens[0] = ImageIO.read(new File("assets/gameScreens/titlescreen.png"));
 			screens[1] = ImageIO.read(new File("assets/gameScreens/whitespace2.png"));
-			
+			speechBoxes[1] = ImageIO.read(new File("assets/scripts/sunny.png"));
+			speechBoxes[2] = ImageIO.read(new File("assets/scripts/kel.png"));
 			speakingFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/fonts/OMORI_GAME2.ttf")).deriveFont(50f);
 		}
 		catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.out.println("fail");
 		} catch (FontFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
 		for (int i = 0; i < 4; i++) {
 			interactables[i] = new ArrayList<Rectangle>();
 			for (int x = 0; x < 2; x++) {
@@ -107,6 +113,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				Thread.sleep(17);
 				g2d.drawImage(screens[1], -1 * mapX, -1 * mapY, null);
 				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
+				
+				if (!scriptRead[menuState]) {
+					g2d.drawImage(speechBoxes[1], 0, 260, null);
+				}
+
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -133,7 +144,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					Player.key = 1;
 					// playerY -= 10;
 					mapY -= charSpeed;
-					timer.start();
+					Player.timer.start();
 
 
 				}
@@ -141,7 +152,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					Player.key = 3;
 					// playerY += 10;
 					mapY += charSpeed;
-					timer.start();
+					Player.timer.start();
 
 
 
@@ -150,7 +161,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					Player.key = 2;
 					// playerX -= 10;
 					mapX -= charSpeed;
-					timer.start();
+					Player.timer.start();
 
 
 
@@ -159,7 +170,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					Player.key = 4;
 					// playerX += 10;
 					mapX += charSpeed;
-					timer.start();
+					Player.timer.start();
 
 				}
 				
@@ -342,14 +353,16 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				right = false;
 				playerIndex = 7;
 			}
-			timer.stop();
+			Player.timer.stop();
 		}
 		repaint();
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent arg0) {
+	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-		Player.run();
+		
 	}
+
+
 }
