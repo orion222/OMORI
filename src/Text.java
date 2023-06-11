@@ -20,12 +20,13 @@ public class Text {
 					System.out.println(cur);
 					if (ind + cur.length() <= 50) {
 						line.append(cur + " ");
-						ind += cur.length() + 1;
+						ind = line.length();
 					}
 					else {
 						slide[lineInd] = line.toString();
 						line.delete(0, line.length());
-						ind = 0;
+						line.append(cur + " ");
+						ind = line.length();
 						lineInd++;
 						// the slide is complete
 						if (lineInd == 3) {
