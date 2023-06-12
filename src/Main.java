@@ -46,6 +46,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public static ArrayList<Rectangle>[] interactables = new ArrayList[4];
 
 	public static ArrayList<Rectangle>[][] bounds = new ArrayList[4][2];
+	public static ArrayList<Rectangle>[] entrances = new ArrayList[4];
 	
 	static Font speakingFont;
 	static Timer timer;
@@ -68,6 +69,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			for (int i = 0; i < 4; i++) {
 				interactables[i] = new ArrayList<Rectangle>();
 				interactablesScript[i] = new ArrayList<Text>();
+				entrances[i] = new ArrayList<Rectangle>();
 				for (int x = 0; x < 2; x++) {
 					bounds[i][x] = new ArrayList<Rectangle>();
 				}
@@ -132,7 +134,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		// map bounds
 		
 		interactables[2].add(new Rectangle(1156, 860, 60, 52));
-		interactables[2].add(new Rectangle(650, 1696, 64, 44));
+		interactables[2].add(new Rectangle(650, 1696, 72, 44));
 		interactables[2].add(new Rectangle(2810, 2150, 72, 72));
 		interactables[2].add(new Rectangle(2916, 2268, 74, 68));
 		interactables[2].add(new Rectangle(3722, 2604, 68, 68));
@@ -196,6 +198,18 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		bounds[2][1].add(new Rectangle(2482, 3594, 144, 134));
 		bounds[2][1].add(new Rectangle(2498, 3816, 122, 464));
 		
+		bounds[2][1].add(new Rectangle(1530, 956, 60, 16)); // above first gate
+		// area after being teleported
+		bounds[2][1].add(new Rectangle(2786, 2094, 60, 16));
+		bounds[2][1].add(new Rectangle(2716, 2108, 210, 80));
+		bounds[2][1].add(new Rectangle(2662, 2166, 422, 134));
+		bounds[2][1].add(new Rectangle(2662, 2222, 764, 224));
+		
+		// entrances
+		entrances[2].add(new Rectangle(1532, 950, 56, 10)); // teleport box thing 1
+		entrances[2].add(new Rectangle(2786, 2094, 60, 5)); // teleport box thing 2 *on top of the metal boxes area*
+		entrances[2].add(new Rectangle(2498, 4274, 122, 10)); // exit from map into black space
+		
 		bounds[3][0] = interactables[3];
 		bounds[3][1].add(new Rectangle(0, 0, 4000, 4000));
 		// end map coordinates should be mapX = 1580, mapY = 1690
@@ -254,12 +268,13 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						speakingInd = 0;
 						scriptRead[menuState] = true;
 						choosing = false;
-						if (interactableScript == 0 && choice) {
+						if (menuState == 1 && interactableScript == 0 && choice) {
 							menuState = 2;
 							System.out.println("new world");
 							mapX = 902;
 							mapY = 644;
 							speaking = true;
+							
 							
 						}
 						choice = true;
@@ -350,6 +365,44 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					}
 					
 				}
+				
+				// map
+				if(menuState == 2) {
+					// teleport thing 1
+					if(within(entrances[2].get(0), new Point(mapX, mapY))) {
+						System.out.println("in gate");
+						up = false;
+						down = false;
+						right = false;
+						left = false;
+						mapX = 2816;
+						mapY = 2128;
+						
+					}
+					// teleport thing 2
+					else if(within(entrances[2].get(1), new Point(mapX, mapY))) {
+						System.out.println("in other gate 2");
+						up = false;
+						down = false;
+						right = false;
+						left = false;
+						mapX = 1560;
+						mapY = 984;
+						
+					}
+					else if(within(entrances[2].get(2), new Point(mapX, mapY))) {
+						System.out.println("exit map into black space");
+						
+						up = false;
+						down = false;
+						right = false;
+						left = false;
+						mapX = 1560;
+						mapY = 984;
+						menuState = 3;
+					}
+				}
+				
 				// black space
 				if (menuState == 3) {
 					if (mapY < 1000) {
