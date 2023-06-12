@@ -24,7 +24,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public static int mapX = 0;
 	public static int mapY = 0;	
 	public static BufferedImage[] screens = new BufferedImage[5];
-	public static BufferedImage[] speechBoxes = new BufferedImage[3];
+	public static BufferedImage[] speechBoxes = new BufferedImage[4];
 	public static int mouseX;
 	public static int mouseY;
 	public static int windowWidth = 900;
@@ -75,9 +75,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			screens[0] = ImageIO.read(new File("assets/gameScreens/titlescreen.png"));
 			screens[1] = ImageIO.read(new File("assets/gameScreens/whitespace2.png"));
 			screens[2] = ImageIO.read(new File("assets/gameScreens/omorimap2.png"));
+			screens[3] = ImageIO.read(new File("assets/gameScreens/blackspace.png"));
 			speechBoxes[0] = ImageIO.read(new File("assets/scripts/speechBox.png"));
 			speechBoxes[1] = ImageIO.read(new File("assets/scripts/sunny.png"));
 			speechBoxes[2] = ImageIO.read(new File("assets/scripts/kel.png"));
+			speechBoxes[3] = ImageIO.read(new File("assets/scripts/sunny.png"));
 			selector = ImageIO.read(new File("assets/scripts/select.png"));
 			speakingFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/fonts/OMORI_GAME2.ttf")).deriveFont(50f);
 			
@@ -104,7 +106,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		interactables[1].add(new Rectangle(980, 1120, 40, 80)); // the pills
 		interactables[1].add(new Rectangle(1140, 1120, 60, 80)); // the book
 		interactables[1].add(new Rectangle(980, 1260, 60, 70)); // the cat
-		
+
+		interactables[3].add(new Rectangle(1464, 1598, 40, 80));
+		interactables[3].add(new Rectangle(1662, 1636, 60, 80));
+		interactables[3].add(new Rectangle(1450, 1782, 60, 70)); // the cat
 
 
 		
@@ -164,6 +169,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		bounds[2][1].add(new Rectangle(2482, 3594, 144, 134));
 		bounds[2][1].add(new Rectangle(2498, 3816, 122, 464));
 		
+		bounds[3][0] = interactables[3];
+		bounds[3][1].add(new Rectangle(0, 0, 4000, 4000));
+		// end map coordinates should be mapX = 1580, mapY = 1690
+		
 		thread = new Thread(this);
 		thread.start();
 		timer = new Timer(250, this);
@@ -189,10 +198,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			g2d.drawImage(screens[0], 0, 0, null);
 
 		}
-		else if (menuState == 1) {
+		else if (menuState > 0) {
 			try {
-				Thread.sleep(0);
-				g2d.drawImage(screens[1], -1 * mapX, -1 * mapY, null);
+				Thread.sleep(17);
+				g2d.drawImage(screens[menuState], -1 * mapX, -1 * mapY, null);
 				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
 				
 				if (speaking) {
@@ -242,13 +251,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				e.printStackTrace();
 			}
 		}
-		else if(menuState == 2) {
-			g2d.drawImage(screens[2], -1 * mapX, -1 * mapY, null);
-			g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
-		}
-
-	
-		
 
 	}
 
@@ -260,8 +262,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			int posX = (menuState >= 1) ? mapX: playerX;
-			int posY = (menuState >= 1) ? mapY: playerY;			
+			int posX = mapX;
+			int posY = mapY;			
 			if (menuState > 0) {
 				if(up && withinBounds(bounds[menuState], new Point(posX, posY - charSpeed))) {
 					Player.key = 1;
@@ -312,6 +314,21 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						mapX = 450;
 					}
 					
+				}
+				// black space
+				if (menuState == 3) {
+					if (mapY < 1000) {
+						mapY = 2395;
+					}
+					if (mapY > 2395) {
+						mapY = 1000;
+					}
+					if (mapX < 700) {
+						mapX = 2700;
+					}
+					if (mapX > 2700) {
+						mapX = 700;
+					}
 				}
 				
 			}
@@ -440,8 +457,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			}
 			// z interact
 			else if (key == 90 && !speaking) {
-				int a = (menuState == 1) ? mapX: playerX;
-				int b = (menuState == 1) ? mapY: playerY;
+				int a = mapX;
+				int b = mapY;
 				for (int i = 0; i < interactables[menuState].size(); i++) {
 					if (interact(interactables[menuState].get(i), new Point(a, b))) {
 						System.out.println("Interacted");
