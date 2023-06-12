@@ -64,6 +64,14 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				
 				playerImages.add(image);
 			}
+
+			for (int i = 0; i < 4; i++) {
+				interactables[i] = new ArrayList<Rectangle>();
+				interactablesScript[i] = new ArrayList<Text>();
+				for (int x = 0; x < 2; x++) {
+					bounds[i][x] = new ArrayList<Rectangle>();
+				}
+			}
 			screens[0] = ImageIO.read(new File("assets/gameScreens/titlescreen.png"));
 			screens[1] = ImageIO.read(new File("assets/gameScreens/whitespace2.png"));
 			speechBoxes[0] = ImageIO.read(new File("assets/scripts/speechBox.png"));
@@ -73,7 +81,13 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			speakingFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/fonts/OMORI_GAME2.ttf")).deriveFont(50f);
 			
 			// script reading
-			mainScript[1] = new Text(new BufferedReader(new FileReader("assets/scripts/script1.txt")), false);
+			for (int i = 1; i < 4; i++) {
+				mainScript[i] = new Text(new BufferedReader(new FileReader("assets/scripts/script" + i + ".txt")), false);
+			}
+			interactablesScript[1].add(new Text("Pills. Take them?", true));
+			interactablesScript[1].add(new Text(new BufferedReader(new FileReader("assets/scripts/journal.txt")), false));
+			interactablesScript[1].get(1).getSlides().add(0, new String[] {"SUNNY'S JOURNAL", "", ""});
+			interactablesScript[1].add(new Text("meow.", false));
 		}
 		catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -86,20 +100,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		
 		
 
-		for (int i = 0; i < 4; i++) {
-			interactables[i] = new ArrayList<Rectangle>();
-			interactablesScript[i] = new ArrayList<Text>();
-			for (int x = 0; x < 2; x++) {
-				bounds[i][x] = new ArrayList<Rectangle>();
-			}
-		}
 		interactables[1].add(new Rectangle(980, 1120, 40, 80)); // the pills
 		interactables[1].add(new Rectangle(1140, 1120, 60, 80)); // the book
 		interactables[1].add(new Rectangle(980, 1260, 60, 70)); // the cat
 		
-		interactablesScript[1].add(new Text("pills. Take them?", true));
-		interactablesScript[1].add(new Text("read", false));
-		interactablesScript[1].add(new Text("meow. GOOD MORNING", false));
+
 
 		
 		bounds[1][0] = interactables[1];
