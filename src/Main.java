@@ -74,6 +74,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			}
 			screens[0] = ImageIO.read(new File("assets/gameScreens/titlescreen.png"));
 			screens[1] = ImageIO.read(new File("assets/gameScreens/whitespace2.png"));
+			screens[2] = ImageIO.read(new File("assets/gameScreens/omorimap2.png"));
 			speechBoxes[0] = ImageIO.read(new File("assets/scripts/speechBox.png"));
 			speechBoxes[1] = ImageIO.read(new File("assets/scripts/sunny.png"));
 			speechBoxes[2] = ImageIO.read(new File("assets/scripts/kel.png"));
@@ -110,6 +111,59 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		bounds[1][0] = interactables[1];
 		bounds[1][1].add(new Rectangle(0, 0, 3000, 3000));
 		
+		// map bounds
+		bounds[2][1].add(new Rectangle(876, 614, 52, 220));
+		bounds[2][1].add(new Rectangle(834, 810, 130, 150));
+		bounds[2][1].add(new Rectangle(784, 922, 416, 656));
+		
+		bounds[2][1].add(new Rectangle(1000, 1558, 324, 144));
+		bounds[2][1].add(new Rectangle(1176, 1700, 78, 56));
+		bounds[2][1].add(new Rectangle(832, 1558, 346, 212));
+		bounds[2][1].add(new Rectangle(720, 1718, 114, 52));
+		
+		bounds[2][1].add(new Rectangle(1320, 1622, 338, 74));
+		bounds[2][1].add(new Rectangle(1452, 1668, 96, 102));
+		bounds[2][1].add(new Rectangle(1658, 1552, 300, 24));
+		bounds[2][1].add(new Rectangle(1664, 1574, 112, 62));
+		bounds[2][1].add(new Rectangle(1510, 970, 156, 686));
+		bounds[2][1].add(new Rectangle(1270, 1286, 186, 26));
+		bounds[2][1].add(new Rectangle(1450, 1286, 62, 12));
+		bounds[2][1].add(new Rectangle(1272, 976, 44, 52));
+		bounds[2][1].add(new Rectangle(1314, 1020, 212, 10));
+		bounds[2][1].add(new Rectangle(1660, 970, 290, 272));
+		bounds[2][1].add(new Rectangle(1660, 1240, 116, 54));
+		
+		bounds[2][1].add(new Rectangle(1948, 970, 84, 48));
+		bounds[2][1].add(new Rectangle(2008, 970, 528, 60));
+		bounds[2][1].add(new Rectangle(2530, 970, 62, 48)); 
+		bounds[2][1].add(new Rectangle(2588, 970, 372, 92)); 
+		bounds[2][1].add(new Rectangle(2830, 1060, 28, 372));
+		bounds[2][1].add(new Rectangle(2664, 1430, 305, 34));
+		bounds[2][1].add(new Rectangle(2946, 1462, 24, 114)); 
+		bounds[2][1].add(new Rectangle(2968, 1540, 400, 38)); 
+		bounds[2][1].add(new Rectangle(3354, 1316, 14, 234)); 
+		bounds[2][1].add(new Rectangle(3354, 1316, 130, 28));
+		bounds[2][1].add(new Rectangle(3466, 1200, 18, 140));
+		bounds[2][1].add(new Rectangle(3466, 1200, 190, 34));
+		bounds[2][1].add(new Rectangle(3638, 1232, 18, 772)); 
+		
+		bounds[2][1].add(new Rectangle(3496, 1942, 144, 62));
+		bounds[2][1].add(new Rectangle(3122, 1942, 378, 36)); 
+		bounds[2][1].add(new Rectangle(3122, 1826, 14, 118));
+		bounds[2][1].add(new Rectangle(2594, 1826, 542, 36)); 
+		
+		bounds[2][1].add(new Rectangle(2594, 1826, 30, 100));
+		bounds[2][1].add(new Rectangle(2556, 1882, 68, 690));
+		bounds[2][1].add(new Rectangle(2380, 2570, 656, 32)); 
+		
+		bounds[2][1].add(new Rectangle(2552, 2600, 14, 702));
+		bounds[2][1].add(new Rectangle(2552, 3300, 156, 204));
+		bounds[2][1].add(new Rectangle(2408, 3356, 146, 148));
+		
+		bounds[2][1].add(new Rectangle(2542, 3448, 32, 376));
+		bounds[2][1].add(new Rectangle(2482, 3594, 144, 134));
+		bounds[2][1].add(new Rectangle(2498, 3816, 122, 464));
+		
 		thread = new Thread(this);
 		thread.start();
 		timer = new Timer(250, this);
@@ -135,9 +189,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			g2d.drawImage(screens[0], 0, 0, null);
 
 		}
-		else if (menuState > 0) {
+		else if (menuState == 1) {
 			try {
-				Thread.sleep(17);
+				Thread.sleep(0);
 				g2d.drawImage(screens[1], -1 * mapX, -1 * mapY, null);
 				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
 				
@@ -163,6 +217,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						if (interactableScript == 0 && choice) {
 							menuState++;
 							System.out.println("new world");
+							mapX = 902;
+							mapY = 644;
+							
 						}
 						choice = true;
 					}
@@ -185,6 +242,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				e.printStackTrace();
 			}
 		}
+		else if(menuState == 2) {
+			g2d.drawImage(screens[2], -1 * mapX, -1 * mapY, null);
+			g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
+		}
 
 	
 		
@@ -199,8 +260,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			int posX = (menuState == 1) ? mapX: playerX;
-			int posY = (menuState == 1) ? mapY: playerY;			
+			int posX = (menuState >= 1) ? mapX: playerX;
+			int posY = (menuState >= 1) ? mapY: playerY;			
 			if (menuState > 0) {
 				if(up && withinBounds(bounds[menuState], new Point(posX, posY - charSpeed))) {
 					Player.key = 1;
