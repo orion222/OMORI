@@ -125,6 +125,13 @@ public class hi extends JPanel implements KeyListener, MouseListener, Runnable, 
 		bounds[2][1].add(new Rectangle(3122, 1826, 14, 118));
 		bounds[2][1].add(new Rectangle(2594, 1826, 542, 36)); //
 		
+		bounds[2][1].add(new Rectangle(3654, 1998, 358, 8));
+		bounds[2][1].add(new Rectangle(3910, 1998, 98, 400));
+		bounds[2][1].add(new Rectangle(3860, 2176, 100, 100));
+		bounds[2][1].add(new Rectangle(3738, 2220, 200, 150));
+		bounds[2][1].add(new Rectangle(3502, 2286, 506, 814));
+		
+		
 		bounds[2][1].add(new Rectangle(2594, 1826, 30, 100));
 		bounds[2][1].add(new Rectangle(2556, 1882, 68, 690));
 		bounds[2][1].add(new Rectangle(2380, 2570, 656, 32)); // adjust this
@@ -137,8 +144,8 @@ public class hi extends JPanel implements KeyListener, MouseListener, Runnable, 
 		bounds[2][1].add(new Rectangle(2482, 3594, 144, 134));
 		bounds[2][1].add(new Rectangle(2498, 3816, 122, 464));
 		
-		
-		
+		bounds[2][1].add(new Rectangle(1530, 956, 60, 16));
+		// 1532 958 -- 1588 958 // teleport gate thing above fence
 		
 		
 		thread = new Thread(this);

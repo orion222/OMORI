@@ -157,6 +157,12 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		bounds[2][1].add(new Rectangle(3122, 1826, 14, 118));
 		bounds[2][1].add(new Rectangle(2594, 1826, 542, 36)); 
 		
+		bounds[2][1].add(new Rectangle(3654, 1998, 358, 8));
+		bounds[2][1].add(new Rectangle(3910, 1998, 98, 400));
+		bounds[2][1].add(new Rectangle(3860, 2176, 100, 100));
+		bounds[2][1].add(new Rectangle(3738, 2220, 200, 150));
+		bounds[2][1].add(new Rectangle(3502, 2286, 506, 400));
+		
 		bounds[2][1].add(new Rectangle(2594, 1826, 30, 100));
 		bounds[2][1].add(new Rectangle(2556, 1882, 68, 690));
 		bounds[2][1].add(new Rectangle(2380, 2570, 656, 32)); 
