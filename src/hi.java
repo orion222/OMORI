@@ -84,68 +84,95 @@ public class hi extends JPanel implements KeyListener, MouseListener, Runnable, 
 //		interactables[1].add(new Rectangle(980, 1260, 60, 70)); // the cat
 //		
 		bounds[1][0] = interactables[1];
-//		bounds[2][1].add(new Rectangle(0, 0, 5000, 5000));
-		bounds[2][1].add(new Rectangle(876, 614, 52, 220));
-		bounds[2][1].add(new Rectangle(834, 810, 130, 150));
-		bounds[2][1].add(new Rectangle(784, 922, 416, 656));
-		
-		bounds[2][1].add(new Rectangle(1000, 1558, 324, 144));
-		bounds[2][1].add(new Rectangle(1176, 1700, 78, 56));
-		bounds[2][1].add(new Rectangle(832, 1558, 346, 212));
-		bounds[2][1].add(new Rectangle(720, 1718, 114, 52));
-		
-		bounds[2][1].add(new Rectangle(1320, 1622, 338, 74));
-		bounds[2][1].add(new Rectangle(1452, 1668, 96, 102));
-		bounds[2][1].add(new Rectangle(1658, 1552, 300, 24));
-		bounds[2][1].add(new Rectangle(1664, 1574, 112, 62));
-		bounds[2][1].add(new Rectangle(1510, 970, 156, 686));
-		bounds[2][1].add(new Rectangle(1270, 1286, 186, 26));
-		bounds[2][1].add(new Rectangle(1450, 1286, 62, 12));
-		bounds[2][1].add(new Rectangle(1272, 976, 44, 52));
-		bounds[2][1].add(new Rectangle(1314, 1020, 212, 10));
-		bounds[2][1].add(new Rectangle(1660, 970, 290, 272));
-		bounds[2][1].add(new Rectangle(1660, 1240, 116, 54));
-		
-		bounds[2][1].add(new Rectangle(1948, 970, 84, 48));
-		bounds[2][1].add(new Rectangle(2008, 970, 528, 60));
-		bounds[2][1].add(new Rectangle(2530, 970, 62, 48)); 
-		bounds[2][1].add(new Rectangle(2588, 970, 372, 92)); // 
-		bounds[2][1].add(new Rectangle(2830, 1060, 28, 372));
-		bounds[2][1].add(new Rectangle(2664, 1430, 305, 34));
-		bounds[2][1].add(new Rectangle(2946, 1462, 24, 114)); //
-		bounds[2][1].add(new Rectangle(2968, 1540, 400, 38)); //ee
-		bounds[2][1].add(new Rectangle(3354, 1316, 14, 234)); // up
-		bounds[2][1].add(new Rectangle(3354, 1316, 130, 28));
-		bounds[2][1].add(new Rectangle(3466, 1200, 18, 140));
-		bounds[2][1].add(new Rectangle(3466, 1200, 190, 34));
-		bounds[2][1].add(new Rectangle(3638, 1232, 18, 772)); //
-		
-		bounds[2][1].add(new Rectangle(3496, 1942, 144, 62));
-		bounds[2][1].add(new Rectangle(3122, 1942, 378, 36)); //
-		bounds[2][1].add(new Rectangle(3122, 1826, 14, 118));
-		bounds[2][1].add(new Rectangle(2594, 1826, 542, 36)); //
-		
-		bounds[2][1].add(new Rectangle(3654, 1998, 358, 8));
-		bounds[2][1].add(new Rectangle(3910, 1998, 98, 400));
-		bounds[2][1].add(new Rectangle(3860, 2176, 100, 100));
-		bounds[2][1].add(new Rectangle(3738, 2220, 200, 150));
-		bounds[2][1].add(new Rectangle(3502, 2286, 506, 814));
-		
-		
-		bounds[2][1].add(new Rectangle(2594, 1826, 30, 100));
-		bounds[2][1].add(new Rectangle(2556, 1882, 68, 690));
-		bounds[2][1].add(new Rectangle(2380, 2570, 656, 32)); // adjust this
-		
-		bounds[2][1].add(new Rectangle(2552, 2600, 14, 702));
-		bounds[2][1].add(new Rectangle(2552, 3300, 156, 204));
-		bounds[2][1].add(new Rectangle(2408, 3356, 146, 148));
-		
-		bounds[2][1].add(new Rectangle(2542, 3448, 32, 376));
-		bounds[2][1].add(new Rectangle(2482, 3594, 144, 134));
-		bounds[2][1].add(new Rectangle(2498, 3816, 122, 464));
+		bounds[2][1].add(new Rectangle(0, 0, 5000, 5000));
+//		bounds[2][1].add(new Rectangle(876, 614, 52, 220));
+//		bounds[2][1].add(new Rectangle(834, 810, 130, 150));
+//		bounds[2][1].add(new Rectangle(784, 922, 416, 656));
+//		
+//		bounds[2][1].add(new Rectangle(1000, 1558, 324, 144));
+//		bounds[2][1].add(new Rectangle(1176, 1700, 78, 56));
+//		bounds[2][1].add(new Rectangle(832, 1558, 346, 212));
+//		bounds[2][1].add(new Rectangle(720, 1718, 114, 52));
+//		
+//		bounds[2][1].add(new Rectangle(1320, 1622, 338, 74));
+//		bounds[2][1].add(new Rectangle(1452, 1668, 96, 102));
+//		bounds[2][1].add(new Rectangle(1658, 1552, 300, 24));
+//		bounds[2][1].add(new Rectangle(1664, 1574, 112, 62));
+//		bounds[2][1].add(new Rectangle(1510, 970, 156, 686));
+//		bounds[2][1].add(new Rectangle(1270, 1286, 186, 26));
+//		bounds[2][1].add(new Rectangle(1450, 1286, 62, 12));
+//		bounds[2][1].add(new Rectangle(1272, 976, 44, 52));
+//		bounds[2][1].add(new Rectangle(1314, 1020, 212, 10));
+//		bounds[2][1].add(new Rectangle(1660, 970, 290, 272));
+//		bounds[2][1].add(new Rectangle(1660, 1240, 116, 54));
+//		
+//		bounds[2][1].add(new Rectangle(1948, 970, 84, 48));
+//		bounds[2][1].add(new Rectangle(2008, 970, 528, 60));
+//		bounds[2][1].add(new Rectangle(2530, 970, 62, 48)); 
+//		bounds[2][1].add(new Rectangle(2588, 970, 372, 92)); // 
+//		bounds[2][1].add(new Rectangle(2830, 1060, 28, 372));
+//		bounds[2][1].add(new Rectangle(2664, 1430, 305, 34));
+//		bounds[2][1].add(new Rectangle(2946, 1462, 24, 114)); //
+//		bounds[2][1].add(new Rectangle(2968, 1540, 400, 38)); //ee
+//		bounds[2][1].add(new Rectangle(3354, 1316, 14, 234)); // up
+//		bounds[2][1].add(new Rectangle(3354, 1316, 130, 28));
+//		bounds[2][1].add(new Rectangle(3466, 1200, 18, 140));
+//		bounds[2][1].add(new Rectangle(3466, 1200, 190, 34));
+//		bounds[2][1].add(new Rectangle(3638, 1232, 18, 772)); //
+//		
+//		bounds[2][1].add(new Rectangle(3496, 1942, 144, 62));
+//		bounds[2][1].add(new Rectangle(3122, 1942, 378, 36)); //
+//		bounds[2][1].add(new Rectangle(3122, 1826, 14, 118));
+//		bounds[2][1].add(new Rectangle(2594, 1826, 542, 36)); //
+//		
+//		bounds[2][1].add(new Rectangle(3654, 1998, 358, 8));
+//		bounds[2][1].add(new Rectangle(3910, 1998, 98, 400));
+//		bounds[2][1].add(new Rectangle(3860, 2176, 100, 100));
+//		bounds[2][1].add(new Rectangle(3738, 2220, 200, 150));
+//		bounds[2][1].add(new Rectangle(3502, 2286, 506, 814));
+//		
+//		
+//		bounds[2][1].add(new Rectangle(2594, 1826, 30, 100));
+//		bounds[2][1].add(new Rectangle(2556, 1882, 68, 690));
+//		bounds[2][1].add(new Rectangle(2380, 2570, 656, 32)); // adjust this
+//		
+//		bounds[2][1].add(new Rectangle(2552, 2600, 14, 702));
+//		bounds[2][1].add(new Rectangle(2552, 3300, 156, 204));
+//		bounds[2][1].add(new Rectangle(2408, 3356, 146, 148));
+//		
+//		bounds[2][1].add(new Rectangle(2542, 3448, 32, 376));
+//		bounds[2][1].add(new Rectangle(2482, 3594, 144, 134));
+//		bounds[2][1].add(new Rectangle(2498, 3816, 122, 464));
 		
 		bounds[2][1].add(new Rectangle(1530, 956, 60, 16));
 		// 1532 958 -- 1588 958 // teleport gate thing above fence
+		 
+		// 2786 2094 -- 2846 2110 // gate
+		// 2716 2108 -- 2926 2188 // under gate
+		// 2662 2166 -- 3084 2300 // top part of picnic area and under car
+		// 2662 2222 -- 3426 2446 // big bound
+		
+		
+		interactables[2].add(new Rectangle(1156, 860, 60, 52));
+		interactables[2].add(new Rectangle(650, 1696, 64, 44));
+		interactables[2].add(new Rectangle(2810, 2150, 72, 72));
+		interactables[2].add(new Rectangle(2916, 2268, 74, 68));
+		interactables[2].add(new Rectangle(3722, 2604, 68, 68));
+		bounds[2][0] = interactables[2];
+		// melon at start
+		// 1176 860 -- 1204 896
+		// melon at bottom of first area
+		// 650 1696 -- 690 1740
+		
+		// picnic box
+		// 2824 2174 -- 2860 2222
+		// turkey
+		// 2942 2268 -- 2990 2320
+		
+		// blue melon
+		// 3742 2620 -- 3784 2656
+		
+		
 		
 		
 		thread = new Thread(this);

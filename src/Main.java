@@ -91,6 +91,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			interactablesScript[1].add(new Text(new BufferedReader(new FileReader("assets/scripts/journal.txt")), false));
 			interactablesScript[1].get(1).getSlides().add(0, new String[] {"SUNNY'S JOURNAL", "", ""});
 			interactablesScript[1].add(new Text("meow.", false));
+			interactablesScript[2].add(new Text("green melon1.", false));
+			interactablesScript[2].add(new Text("green melon2.", false));
+			interactablesScript[2].add(new Text("picnic box.", false));
+			interactablesScript[2].add(new Text("chicken.", false));
+			interactablesScript[2].add(new Text("blue melon.", false));
 		}
 		catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -125,9 +130,17 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		bounds[1][1].add(new Rectangle(0, 0, 3000, 3000));
 		
 		// map bounds
+		
+		interactables[2].add(new Rectangle(1156, 860, 60, 52));
+		interactables[2].add(new Rectangle(650, 1696, 64, 44));
+		interactables[2].add(new Rectangle(2810, 2150, 72, 72));
+		interactables[2].add(new Rectangle(2916, 2268, 74, 68));
+		interactables[2].add(new Rectangle(3722, 2604, 68, 68));
+		bounds[2][0] = interactables[2];
+		
 		bounds[2][1].add(new Rectangle(876, 614, 52, 220));
 		bounds[2][1].add(new Rectangle(834, 810, 130, 150));
-		bounds[2][1].add(new Rectangle(784, 922, 416, 656));
+		bounds[2][1].add(new Rectangle(784, 910, 416, 668));
 		
 		bounds[2][1].add(new Rectangle(1000, 1558, 324, 144));
 		bounds[2][1].add(new Rectangle(1176, 1700, 78, 56));
@@ -242,14 +255,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						scriptRead[menuState] = true;
 						choosing = false;
 						if (interactableScript == 0 && choice) {
-							menuState = 3;
+							menuState = 2;
 							System.out.println("new world");
-//							mapX = 902;
-//							mapY = 644;
-							mapX = 1580;
-							mapY = 1690;
+							mapX = 902;
+							mapY = 644;
 							speaking = true;
-							interactableScript = -1;
 							
 						}
 						choice = true;
