@@ -103,7 +103,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		
 		
 
-		interactables[1].add(new Rectangle(980, 1120, 40, 80)); // the pills
+		interactables[1].add(new Rectangle(981, 1120, 40, 80)); // the pills
 		interactables[1].add(new Rectangle(1140, 1120, 60, 80)); // the book
 		interactables[1].add(new Rectangle(980, 1260, 60, 70)); // the cat
 
@@ -213,7 +213,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				if (speaking) {
 					
 					Text cur = null;
-					ArrayList<String[]> curSlides = null;
+					ArrayList<String[]> curSlides = null; 
 					if (!scriptRead[menuState]) {
 						g2d.drawImage(speechBoxes[menuState], 0, 260, null);
 						cur = mainScript[menuState];
@@ -234,6 +234,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 							System.out.println("new world");
 							mapX = 902;
 							mapY = 644;
+							speaking = true;
+							interactableScript = -1;
 							
 						}
 						choice = true;
@@ -358,8 +360,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	
 	
 	public boolean interact(Rectangle r, Point p) {
-		if (r.x <= p.x && p.x <= r.x + r.width) {
-			if (r.y <= p.y && p.y <= r.y + r.height) {
+		if (r.x - 1<= p.x && p.x <= r.x + r.width + 1) {
+			if (r.y - 1 <= p.y && p.y <= r.y + r.height + 1) {
 				return true;
 			}
 		}
