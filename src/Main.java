@@ -110,6 +110,14 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		interactables[3].add(new Rectangle(1464, 1598, 40, 80));
 		interactables[3].add(new Rectangle(1662, 1636, 60, 80));
 		interactables[3].add(new Rectangle(1450, 1782, 60, 70)); // the cat
+		
+		// doors, starting from one on the left. clockwise fashion
+		interactables[3].add(new Rectangle(1248, 1624, 86, 80));
+		interactables[3].add(new Rectangle(1444, 1432, 86, 80));
+		interactables[3].add(new Rectangle(1778, 1480, 86, 80));
+		interactables[3].add(new Rectangle(1854, 1748, 86, 80));
+		interactables[3].add(new Rectangle(1654, 1926, 86, 80));
+		interactables[3].add(new Rectangle(1400, 1890, 86, 80));
 
 
 		
@@ -214,6 +222,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					
 					Text cur = null;
 					ArrayList<String[]> curSlides = null; 
+					up = false;
+					down = false;
+					right = false;
+					left = false;
 					if (!scriptRead[menuState]) {
 						g2d.drawImage(speechBoxes[menuState], 0, 260, null);
 						cur = mainScript[menuState];
@@ -230,10 +242,12 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						scriptRead[menuState] = true;
 						choosing = false;
 						if (interactableScript == 0 && choice) {
-							menuState++;
+							menuState = 3;
 							System.out.println("new world");
-							mapX = 902;
-							mapY = 644;
+//							mapX = 902;
+//							mapY = 644;
+							mapX = 1580;
+							mapY = 1690;
 							speaking = true;
 							interactableScript = -1;
 							
@@ -278,6 +292,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					// playerY -= 10;
 					mapY -= charSpeed;
 					Player.timer.start();
+					System.out.println(mapX + " " + mapY);
 
 
 				}
@@ -285,8 +300,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					Player.key = 3;
 					// playerY += 10;
 					mapY += charSpeed;
-					Player.timer.start();
-
+					Player.timer.start();					
+					System.out.println(mapX + " " + mapY);
 
 
 				}
@@ -295,6 +310,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					// playerX -= 10;
 					mapX -= charSpeed;
 					Player.timer.start();
+					System.out.println(mapX + " " + mapY);
 
 
 
@@ -304,6 +320,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					// playerX += 10;
 					mapX += charSpeed;
 					Player.timer.start();
+					System.out.println(mapX + " " + mapY);
 
 				}
 				
@@ -326,9 +343,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				// black space
 				if (menuState == 3) {
 					if (mapY < 1000) {
-						mapY = 2395;
+						mapY = 2394;
 					}
-					if (mapY > 2395) {
+					if (mapY > 2394) {
 						mapY = 1000;
 					}
 					if (mapX < 700) {
