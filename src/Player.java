@@ -40,22 +40,22 @@ public class Player extends JPanel implements Runnable, ActionListener{
 	public void run() {
 		
 		// TODO Auto-generated method stub
-		if(key == 1) {
+		if(key == 1 && game.yCounter % 50 == 0) {
 			if(legUp) game.playerIndex = 9;
 			else game.playerIndex = 11;
 			legUp = !legUp;
 		}
-		else if(key == 2) {
+		else if(key == 2 && game.xCounter % 50 == 0) {
 			if(legLeft) game.playerIndex = 3;
 			else game.playerIndex = 5;
 			legLeft = !legLeft;
 		}
-		else if(key == 3) {
+		else if(key == 3 && game.yCounter % 50 == 0) {
 			if(legDown) game.playerIndex = 0;
 			else game.playerIndex = 2;
 			legDown = !legDown;
 		}
-		else {
+		else if (key == 4 && game.xCounter % 50 == 0){
 			if(legRight) game.playerIndex = 6;
 			else game.playerIndex = 8;
 			legRight = !legRight;

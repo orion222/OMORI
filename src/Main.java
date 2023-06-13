@@ -17,6 +17,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	ArrayList<Image> playerImages = new ArrayList<>(); // arraylist of player images
 	int playerIndex = 1; // which image to display of player
 	int playerX = 400, playerY = 250;
+	int xCounter = 0;
+	int yCounter = 0;  // mod 100 
 	
 	Player Player = new Player(this);
 	public static int menuState = 0;
@@ -244,7 +246,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				Thread.sleep(17);
 				g2d.drawImage(screens[menuState], -1 * mapX, -1 * mapY, null);
 				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
-				
 				if (speaking) {
 					
 					Text cur = null;
@@ -273,9 +274,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 							System.out.println("new world");
 							mapX = 902;
 							mapY = 644;
+							playerIndex = 1;
 							speaking = true;
-							
-							
 						}
 						choice = true;
 					}
@@ -318,6 +318,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					mapY -= charSpeed;
 					Player.run();
 					System.out.println(mapX + " " + mapY);
+					yCounter = (yCounter - charSpeed) % 1000;
 
 
 				}
@@ -327,6 +328,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					mapY += charSpeed;
 					Player.run();
 					System.out.println(mapX + " " + mapY);
+					yCounter = (yCounter + charSpeed) % 1000;
 
 
 				}
@@ -336,8 +338,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					mapX -= charSpeed;
 					Player.run();
 					System.out.println(mapX + " " + mapY);
-
-
+					xCounter = (xCounter - charSpeed) % 1000;
 
 				}
 				if(right && withinBounds(bounds[menuState], new Point(posX + charSpeed, posY))) {
@@ -346,6 +347,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					mapX += charSpeed;
 					Player.run();
 					System.out.println(mapX + " " + mapY);
+					xCounter = (xCounter + charSpeed) % 1000;
 
 				}
 				
@@ -590,12 +592,13 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public void keyReleased(KeyEvent e) {
 		// TODO Auto-generated method stub
 		int key = e.getKeyCode();
-		if (menuState > 0) {
+		if (menuState > 0 && !speaking) {
 			// w
 			if(key == 38) {
 				System.out.println("w releaes");
 				up = false;
 				playerIndex = 10;
+				yCounter = 0;
 			}
 			// a
 			else if(key == 37) {
@@ -603,18 +606,21 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				System.out.println("a relaes");
 				left = false;
 				playerIndex = 4;
+				xCounter = 0;
 			}
 			// s
 			else if(key == 40) {
 				System.out.println("s release");
 				down = false;
 				playerIndex = 1;
+				yCounter = 0;
 			}
 			// d
 			else if(key == 39) {
 				System.out.println("d release");
 				right = false;
 				playerIndex = 7;
+				xCounter = 0;
 			}
 			else if (key == 16) {
 				charSpeed = 2;
