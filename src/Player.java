@@ -18,7 +18,7 @@ public class Player extends JPanel implements Runnable, ActionListener{
 	private int HP;
 	private ArrayList<String> attacks = new ArrayList<>();
 	private ArrayList<String> items = new ArrayList<>();
-	public Timer timer = new Timer(90, this);
+	public Timer timer = new Timer(250, this);
 
 	public Main game;
 	

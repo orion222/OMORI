@@ -114,17 +114,17 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		interactables[1].add(new Rectangle(1140, 1120, 60, 80)); // the book
 		interactables[1].add(new Rectangle(980, 1260, 60, 70)); // the cat
 
-		interactables[3].add(new Rectangle(1464, 1598, 40, 80));
-		interactables[3].add(new Rectangle(1662, 1636, 60, 80));
-		interactables[3].add(new Rectangle(1450, 1782, 60, 70)); // the cat
+		interactables[3].add(new Rectangle(1464, 1598, 40, 80)); // th epills
+		interactables[3].add(new Rectangle(1686, 1716, 60, 80)); // the book
+		interactables[3].add(new Rectangle(1450, 1782, 90, 70)); // the cat
 		
 		// doors, starting from one on the left. clockwise fashion
-		interactables[3].add(new Rectangle(1248, 1624, 86, 80));
-		interactables[3].add(new Rectangle(1444, 1432, 86, 80));
-		interactables[3].add(new Rectangle(1778, 1480, 86, 80));
-		interactables[3].add(new Rectangle(1854, 1748, 86, 80));
-		interactables[3].add(new Rectangle(1654, 1926, 86, 80));
-		interactables[3].add(new Rectangle(1400, 1890, 86, 80));
+		interactables[3].add(new Rectangle(1248, 1624, 82, 80));
+		interactables[3].add(new Rectangle(1444, 1432, 82, 80));
+		interactables[3].add(new Rectangle(1778, 1480, 82, 80));
+		interactables[3].add(new Rectangle(1854, 1748, 82, 80));
+		interactables[3].add(new Rectangle(1654, 1926, 82, 80));
+		interactables[3].add(new Rectangle(1400, 1890, 82, 80));
 
 
 		
@@ -316,7 +316,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					Player.key = 1;
 					// playerY -= 10;
 					mapY -= charSpeed;
-					Player.timer.start();
+					Player.run();
 					System.out.println(mapX + " " + mapY);
 
 
@@ -325,7 +325,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					Player.key = 3;
 					// playerY += 10;
 					mapY += charSpeed;
-					Player.timer.start();					
+					Player.run();
 					System.out.println(mapX + " " + mapY);
 
 
@@ -334,7 +334,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					Player.key = 2;
 					// playerX -= 10;
 					mapX -= charSpeed;
-					Player.timer.start();
+					Player.run();
 					System.out.println(mapX + " " + mapY);
 
 
@@ -344,7 +344,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					Player.key = 4;
 					// playerX += 10;
 					mapX += charSpeed;
-					Player.timer.start();
+					Player.run();
 					System.out.println(mapX + " " + mapY);
 
 				}
@@ -397,8 +397,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						down = false;
 						right = false;
 						left = false;
-						mapX = 1560;
-						mapY = 984;
+						mapX = 1580;
+						mapY = 1690;
 						menuState = 3;
 					}
 				}
@@ -478,8 +478,16 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				System.out.println("clicked");
 				mapX = 1050;
 				mapY = 1200;
+			}
+			// options
+			else if (within(new Rectangle(381, 545, 155, 40), getMousePosition())) {
 				
-			}			
+			}		
+			
+			// quit
+			else if (within(new Rectangle(616, 545, 139, 40), getMousePosition())) {
+				System.exit(0);
+			}		
 		}
 		repaint();	
 		
@@ -518,7 +526,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	@Override
 	public void keyPressed(KeyEvent e) {
 		int key = e.getKeyCode();
-		if (menuState > 0) {
+		if (menuState == 0) {
+			
+		}
+		else if (menuState > 0) {
 			// w
 			if(key == 38 && !speaking) {
 				up = true;
@@ -527,10 +538,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			else if(key == 37) {
 				
 				if (speaking) choice = true;
-				
 				else left = true;
-
-
 			}
 			// s
 			else if(key == 40 && !speaking) {
@@ -570,6 +578,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					System.out.println('x');
 				}
 			}
+			else if (key == 16 && !speaking) {
+				charSpeed = 4;
+			}
 		}
 		repaint();
 		
@@ -581,7 +592,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		int key = e.getKeyCode();
 		if (menuState > 0) {
 			// w
-			if(key == 38 && !speaking) {
+			if(key == 38) {
 				System.out.println("w releaes");
 				up = false;
 				playerIndex = 10;
@@ -594,18 +605,20 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				playerIndex = 4;
 			}
 			// s
-			else if(key == 40 && !speaking) {
+			else if(key == 40) {
 				System.out.println("s release");
 				down = false;
 				playerIndex = 1;
 			}
 			// d
-			else if(key == 39 && !speaking) {
+			else if(key == 39) {
 				System.out.println("d release");
 				right = false;
 				playerIndex = 7;
 			}
-			Player.timer.stop();
+			else if (key == 16) {
+				charSpeed = 2;
+			}
 		}
 		repaint();
 	}
