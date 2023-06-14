@@ -597,7 +597,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			if(key == 38) {
 				System.out.println("w releaes");
 				up = false;
-				playerIndex = 10;
+				if(!up && !down && !left && !right) playerIndex = 10;
 				yCounter = 0;
 			}
 			// a
@@ -605,21 +605,21 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				
 				System.out.println("a relaes");
 				left = false;
-				playerIndex = 4;
+				if(!up && !down && !left && !right) playerIndex = 4;
 				xCounter = 0;
 			}
 			// s
 			else if(key == 40) {
 				System.out.println("s release");
 				down = false;
-				playerIndex = 1;
+				if(!up && !down && !left && !right) playerIndex = 1;
 				yCounter = 0;
 			}
 			// d
 			else if(key == 39) {
 				System.out.println("d release");
 				right = false;
-				playerIndex = 7;
+				if(!up && !down && !left && !right) playerIndex = 7;
 				xCounter = 0;
 			}
 			else if (key == 16) {
