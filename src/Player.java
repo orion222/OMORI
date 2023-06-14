@@ -11,13 +11,12 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.util.*;
 
-public class Player extends JPanel implements Runnable, ActionListener{
+public class Player extends JPanel implements Runnable{
 
 	
 	private int HP;
 	private ArrayList<String> attacks = new ArrayList<>();
 	private ArrayList<String> items = new ArrayList<>();
-	public Timer timer = new Timer(250, this);
 
 	public Main game;
 	
@@ -28,12 +27,7 @@ public class Player extends JPanel implements Runnable, ActionListener{
 
 	int key = 0;
 	boolean legUp, legDown, legLeft, legRight;
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
-		run();
-	}
-	
+
 
 	@Override
 	public void run() {

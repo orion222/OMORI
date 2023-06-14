@@ -11,7 +11,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.util.*;
 
-public class Main extends JPanel implements KeyListener, MouseListener, Runnable, ActionListener{
+public class Main extends JPanel implements KeyListener, MouseListener, Runnable{
 
 	boolean up, down, left, right; // movement in a direction
 	ArrayList<Image> playerImages = new ArrayList<>(); // arraylist of player images
@@ -51,7 +51,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public static ArrayList<Rectangle>[] entrances = new ArrayList[4];
 	
 	static Font speakingFont;
-	static Timer timer;
 	public Main() {
 		setPreferredSize(new Dimension(900, 600));
 		setBackground(new Color(200, 0, 0));
@@ -218,7 +217,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		
 		thread = new Thread(this);
 		thread.start();
-		timer = new Timer(250, this);
 	}
 	
 	public static void main(String[] args) {
@@ -629,11 +627,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		repaint();
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
 
 
 }
