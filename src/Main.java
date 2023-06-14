@@ -318,7 +318,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					mapY -= charSpeed;
 					Player.run();
 					System.out.println(mapX + " " + mapY);
-					yCounter = (yCounter - charSpeed) % 1000;
+					yCounter = (yCounter - 1) % 1000;
 
 
 				}
@@ -328,7 +328,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					mapY += charSpeed;
 					Player.run();
 					System.out.println(mapX + " " + mapY);
-					yCounter = (yCounter + charSpeed) % 1000;
+					yCounter = (yCounter + 1) % 1000;
 
 
 				}
@@ -338,7 +338,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					mapX -= charSpeed;
 					Player.run();
 					System.out.println(mapX + " " + mapY);
-					xCounter = (xCounter - charSpeed) % 1000;
+					xCounter = (xCounter - 1) % 1000;
 
 				}
 				if(right && withinBounds(bounds[menuState], new Point(posX + charSpeed, posY))) {
@@ -347,7 +347,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					mapX += charSpeed;
 					Player.run();
 					System.out.println(mapX + " " + mapY);
-					xCounter = (xCounter + charSpeed) % 1000;
+					xCounter = (xCounter + 1) % 1000;
 
 				}
 				
