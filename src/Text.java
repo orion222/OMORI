@@ -18,7 +18,6 @@ public class Text {
 				StringTokenizer st = new StringTokenizer(s);
 				while (st.hasMoreTokens()) {
 					String cur = st.nextToken();
-					System.out.println(cur);
 					if (ind + cur.length() <= 50) {
 						line.append(cur + " ");
 						ind = line.length();
@@ -59,7 +58,6 @@ public class Text {
 		StringTokenizer st = new StringTokenizer(s);
 		while (st.hasMoreTokens()) {
 			String cur = st.nextToken();
-			System.out.println(cur);
 			if (ind + cur.length() <= 50) {
 				line.append(cur + " ");
 				ind = line.length();

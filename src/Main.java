@@ -51,6 +51,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public static ArrayList<Rectangle>[] entrances = new ArrayList[4];
 	
 	static Font speakingFont;
+	
+	Audio sound = new Audio(this);
+	static int lastPlayedSoundEffect;
+	static boolean[] settingSongPlayed = new boolean[4];
 	public Main() {
 		setPreferredSize(new Dimension(900, 600));
 		setBackground(new Color(200, 0, 0));
@@ -235,12 +239,25 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setFont(speakingFont);
 		g2d.setColor(new Color(255, 255, 255));
+		
+		// play song
+		if (!settingSongPlayed[menuState]) {
+			try {
+				sound.playSettingMusic(menuState);
+				settingSongPlayed[menuState] = true;
+			} catch (LineUnavailableException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} 
+		
 		if (menuState == 0) {
 			g2d.drawImage(screens[0], 0, 0, null);
 
 		}
 		else if (menuState > 0) {
 			try {
+				
 				Thread.sleep(10);
 				g2d.drawImage(screens[menuState], -1 * mapX, -1 * mapY, null);
 				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
@@ -552,17 +569,24 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 
 			}
 			// z interact
-			else if (key == 90 && !speaking) {
+			if (key == 90 && !speaking) {
 				int a = mapX;
 				int b = mapY;
 				for (int i = 0; i < interactables[menuState].size(); i++) {
 					if (interact(interactables[menuState].get(i), new Point(a, b))) {
 						System.out.println("Interacted");
-						
+						try {
+							sound.playSoundEffect(7);
+							lastPlayedSoundEffect = 7;
+						} catch (LineUnavailableException | IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 						if (interactablesScript[menuState].get(i) != null) {
 							speaking = true;
 							interactableScript = i;
 							System.out.println("yay");
+						
 							// if the interactable prompts the user to make a choice
 							if (interactablesScript[menuState].get(i).getChoice()) {
 								choosing = true;
