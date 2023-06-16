@@ -241,7 +241,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		}
 		else if (menuState > 0) {
 			try {
-				Thread.sleep(17);
+				Thread.sleep(10);
 				g2d.drawImage(screens[menuState], -1 * mapX, -1 * mapY, null);
 				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
 				if (speaking) {
