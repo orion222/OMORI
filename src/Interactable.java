@@ -1,11 +1,14 @@
 import java.util.*;
 import java.io.*;
-public class Text {
+public class Interactable {
 	
 	private ArrayList<String[]> slides = new ArrayList<String[]>();
 	private boolean choice = false;
+	private int health;
+	private String name;
 	
-	public Text(BufferedReader file, boolean option) {
+	
+	public Interactable(BufferedReader file, boolean option) {
 		try {
 			this.choice = option;
 			String s;
@@ -48,9 +51,10 @@ public class Text {
 			System.out.println("io exception");
 		}
 	}
-	public Text(String s, boolean option) {
+	public Interactable(String s, boolean option, String name, int health) {
 		this.choice = option;
-
+		this.name = name;
+		this.health = health;
 		StringBuilder line = new StringBuilder("");
 		String[] slide = new String[] {"", "", ""};
 		int ind = 0;
@@ -81,8 +85,8 @@ public class Text {
 			slide[2] = "                  YES                  NO";
 		}
 		slides.add(slide);
-
 	}
+	
 	
 	// getter
 	public ArrayList<String[]> getSlides(){
@@ -93,6 +97,12 @@ public class Text {
 	}
 	public boolean getChoice() {
 		return choice;
+	}
+	public String getName() {
+		return name;
+	}
+	public int getHealth() {
+		return health;
 	}
 	public String toString() {
 		return slides.toString();

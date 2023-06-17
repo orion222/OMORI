@@ -4,34 +4,37 @@ import java.io.*;
 import javax.sound.sampled.*;
 public class Audio {
 	
-	Main game;
-	Test g;
-	private static AudioInputStream[] mapSongs = new AudioInputStream[4];
-	private static ArrayList<AudioInputStream> soundEffects = new ArrayList<AudioInputStream>();
-	private Clip settingMusic;
-	private Clip soundEffect;
-	public Audio(Main e) {
-		game = e;
+	static AudioInputStream[] mapSongs = new AudioInputStream[4];
+	static ArrayList<Clip> soundEffects = new ArrayList<Clip>();
+	static ArrayList<String> soundEffectNames = new ArrayList<String>();
+	static  Clip settingMusic;
+	static  Clip soundEffect;
+	static int lastPlayedSoundEffect;
+	public Audio() {
 		try {
 			mapSongs[0] = AudioSystem.getAudioInputStream(new File("assets/music/Title.wav"));
 			mapSongs[1] = AudioSystem.getAudioInputStream(new File("assets/music/WHITESPACE2.wav"));
 			mapSongs[2] = AudioSystem.getAudioInputStream(new File("assets/music/ForestChillin.wav"));
 			mapSongs[3] = AudioSystem.getAudioInputStream(new File("assets/music/BLACKSPACE.wav"));
-			soundEffects.add(AudioSystem.getAudioInputStream(new File("assets/sounds/scare1.wav")));
-			soundEffects.add(AudioSystem.getAudioInputStream(new File("assets/sounds/scare2.wav")));
-			soundEffects.add(AudioSystem.getAudioInputStream(new File("assets/sounds/getItem.wav")));
-			soundEffects.add(AudioSystem.getAudioInputStream(new File("assets/sounds/heal.wav")));
-			soundEffects.add(AudioSystem.getAudioInputStream(new File("assets/sounds/selectOption.wav")));
-			soundEffects.add(AudioSystem.getAudioInputStream(new File("assets/sounds/unlockDoor.wav")));
-			soundEffects.add(AudioSystem.getAudioInputStream(new File("assets/sounds/lockedDoor.wav")));
-			soundEffects.add(AudioSystem.getAudioInputStream(new File("assets/sounds/interact.wav")));
+			soundEffectNames.add("scare1");
+			soundEffectNames.add("scare2");
+			soundEffectNames.add("getItem");
+			soundEffectNames.add("heal");
+			soundEffectNames.add("selectOption");
+			soundEffectNames.add("unlockDoor");
+			soundEffectNames.add("lockedDoor");
+			soundEffectNames.add("interact");
+			for (int i = 0; i < 8; i++) {
+				soundEffects.add(AudioSystem.getClip());
+				soundEffects.get(i).open(AudioSystem.getAudioInputStream(new File("assets/sounds/" + soundEffectNames.get(i) + ".wav")));
+			}
 
-		
 		}
-		catch (IOException | UnsupportedAudioFileException e1) {
+		catch (IOException | UnsupportedAudioFileException | LineUnavailableException e1) {
 			e1.printStackTrace();
 		}
 	}
+	
 
 	public void playSettingMusic(int menuState) throws LineUnavailableException, IOException {
 	    if (settingMusic != null && settingMusic.isRunning()) {
@@ -46,24 +49,12 @@ public class Audio {
 	}
 
 	public void playSoundEffect(int n) throws LineUnavailableException, IOException {
-		// play the same sound as before
-		if (n == game.lastPlayedSoundEffect) {
-			System.out.println("BLAH2");
-	    	soundEffect.setFramePosition(0);
-	    	soundEffect.start();
-	    }
-		else {
-			System.out.println("BLAH3");
-		    soundEffect = AudioSystem.getClip();
-		    soundEffect.open(soundEffects.get(n));
-		    soundEffect.start();
-		}
-
-
+		System.out.println("BLAH3");
+	    Clip cur = soundEffects.get(n);
+	    cur.setFramePosition(0);
+	    cur.start();
 	}
-	public void resetSoundEffect() {
-		
-	}
+
 
 
 }

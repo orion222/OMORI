@@ -41,9 +41,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	static boolean speaking = true;
 	static int speakingInd = 0;
 	static boolean[] scriptRead = new boolean[4];
-	static Text[] mainScript = new Text[4];
+	static Interactable[] mainScript = new Interactable[4];
 	static BufferedImage selector;
-	static ArrayList<Text>[] interactablesScript = new ArrayList[4];
+	static ArrayList<Interactable>[] interactablesScript = new ArrayList[4];
 	static int interactableScript = -1;
 	static boolean choosing = false;
 	static boolean choice = true;
@@ -58,9 +58,12 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	
 	static Font speakingFont;
 	
-	Audio sound = new Audio(this);
-	static int lastPlayedSoundEffect;
+	Audio sound = new Audio();
 	static boolean[] settingSongPlayed = new boolean[4];
+	
+	
+	static boolean[] healsVisited = new boolean[6];
+	HashMap<String, Integer> backpack = new HashMap<String, Integer>();
 	public Main() {
 		setPreferredSize(new Dimension(900, 600));
 		setBackground(new Color(200, 0, 0));
@@ -79,7 +82,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 
 			for (int i = 0; i < 4; i++) {
 				interactables[i] = new ArrayList<Rectangle>();
-				interactablesScript[i] = new ArrayList<Text>();
+				interactablesScript[i] = new ArrayList<Interactable>();
 				entrances[i] = new ArrayList<Rectangle>();
 				for (int x = 0; x < 2; x++) {
 					bounds[i][x] = new ArrayList<Rectangle>();
@@ -101,17 +104,17 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			
 			// script reading
 			for (int i = 1; i < 4; i++) {
-				mainScript[i] = new Text(new BufferedReader(new FileReader("assets/scripts/script" + i + ".txt")), false);
+				mainScript[i] = new Interactable(new BufferedReader(new FileReader("assets/scripts/script" + i + ".txt")), false);
 			}
-			interactablesScript[1].add(new Text("Unknown pills. They're labelled HIGHLY POISONOUS. Take them?", true));
-			interactablesScript[1].add(new Text(new BufferedReader(new FileReader("assets/scripts/journal.txt")), false));
+			interactablesScript[1].add(new Interactable("Unknown pills. They're labelled HIGHLY POISONOUS. Take them?", true, "pills", 0));
+			interactablesScript[1].add(new Interactable(new BufferedReader(new FileReader("assets/scripts/journal.txt")), false));
 			interactablesScript[1].get(1).getSlides().add(0, new String[] {"SUNNY'S JOURNAL", "", ""});
-			interactablesScript[1].add(new Text("meow.", false));
-			interactablesScript[2].add(new Text("green melon1.", false));
-			interactablesScript[2].add(new Text("green melon2.", false));
-			interactablesScript[2].add(new Text("picnic box.", false));
-			interactablesScript[2].add(new Text("chicken.", false));
-			interactablesScript[2].add(new Text("blue melon.", false));
+			interactablesScript[1].add(new Interactable("meow.", false, "cat", 0));
+			interactablesScript[2].add(new Interactable("Grab a piece of green melon?", true, "Green melon", 10));
+			interactablesScript[2].add(new Interactable("Grab a piece of green melon?", true, "Green melon", 10));
+			interactablesScript[2].add(new Interactable("Grab an apple out of the picnic box?", true, "picnic", 30));
+			interactablesScript[2].add(new Interactable("Grab a slice of chicken?", true, "chicken", 30));
+			interactablesScript[2].add(new Interactable("Grab a piece of blue melon?", true, "Blue melon", 15));
 		}
 		catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -250,13 +253,15 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		
 		// play song
 		if (!settingSongPlayed[menuState]) {
+
 			try {
 				sound.playSettingMusic(menuState);
-				settingSongPlayed[menuState] = true;
 			} catch (LineUnavailableException | IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			settingSongPlayed[menuState] = true;
+
 		} 
 		
 		if (menuState == 0) {
@@ -283,7 +288,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
 				if (speaking) {
 					
-					Text cur = null;
+					Interactable cur = null;
 					ArrayList<String[]> curSlides = null; 
 					up = false;
 					down = false;
@@ -300,10 +305,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						curSlides = cur.getSlides();
 					}
 					if (speakingInd == cur.getSlidesSize()) {
-						speaking = false;
-						speakingInd = 0;
-						scriptRead[menuState] = true;
 						choosing = false;
+						speakingInd = 0;
+						speaking = false;
+
 						if (menuState == 1 && interactableScript == 0 && choice) {
 							menuState = 2;
 							System.out.println("new world");
@@ -312,7 +317,24 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 							playerIndex = 1;
 							speaking = true;
 						}
-						choice = true;
+						else if (menuState == 2 && choice && scriptRead[menuState]) {
+							try {
+								sound.playSoundEffect(2);
+								String curItem = interactablesScript[menuState].get(interactableScript).getName();
+								backpack.putIfAbsent(curItem, 0);
+								backpack.put(curItem, backpack.get(curItem) + 1);
+								System.out.println("bagged");
+							} catch (LineUnavailableException | IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						else {
+							scriptRead[menuState] = true;
+							choice = true;
+						}
+						
+
 					}
 					else {
 						g2d.drawString(curSlides.get(speakingInd)[0], 25, 480);
@@ -515,41 +537,50 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	
 
 	@Override
-	public void mousePressed(MouseEvent e) {
+	public void mousePressed(MouseEvent e){
 		mouseX = e.getX();
 		mouseY = e.getY();
-		
-		if (menuState == 0) {
-			if (submenuOption == 0) {
+		try {
+			if (menuState == 0) {
+				if (submenuOption == 0) {
+					
+					// play game
+					if (within(new Rectangle(142, 545, 169, 40), getMousePosition())) {
+						menuState = 1;
+						System.out.println("clicked");
+						mapX = 1050;
+						mapY = 1200;
+						sound.playSoundEffect(4);
+					}
+					// options
+					else if (within(new Rectangle(381, 545, 155, 40), getMousePosition())) {
+						submenuOption = 1;
+						sound.playSoundEffect(4);
+					}		
+					
+					// quit
+					else if (within(new Rectangle(616, 545, 139, 40), getMousePosition())) {
+						sound.playSoundEffect(4);
+						System.exit(0);
+					}
+					else if (hoveringSecret) {
+						submenuOption = 2;
+					}
+				}
+				else if (submenuOption == 1 || submenuOption == 2) {
+					if (within(new Rectangle(45, 548, 169, 40), getMousePosition())) {
+						submenuOption = 0;
+						sound.playSoundEffect(4);
+					}
+				}
 				
-				// play game
-				if (within(new Rectangle(142, 545, 169, 40), getMousePosition())) {
-					menuState = 1;
-					System.out.println("clicked");
-					mapX = 1050;
-					mapY = 1200;
-				}
-				// options
-				else if (within(new Rectangle(381, 545, 155, 40), getMousePosition())) {
-					submenuOption = 1;
-				}		
-				
-				// quit
-				else if (within(new Rectangle(616, 545, 139, 40), getMousePosition())) {
-					System.exit(0);
-				}
-				else if (hoveringSecret) {
-					submenuOption = 2;
-				}
 			}
-			else if (submenuOption == 1 || submenuOption == 2) {
-				if (within(new Rectangle(45, 548, 169, 40), getMousePosition())) {
-					submenuOption = 0;
-				}
-			}
-			
+			repaint();	
 		}
-		repaint();	
+		catch (LineUnavailableException | IOException e1) {
+			e1.printStackTrace();
+		}
+		
 		
 		
 	}
@@ -616,7 +647,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						System.out.println("Interacted");
 						try {
 							sound.playSoundEffect(7);
-							lastPlayedSoundEffect = 7;
 						} catch (LineUnavailableException | IOException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
