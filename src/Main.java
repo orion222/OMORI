@@ -565,6 +565,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					}
 					else if (hoveringSecret) {
 						submenuOption = 2;
+						sound.playSoundEffect(4);
 					}
 				}
 				else if (submenuOption == 1 || submenuOption == 2) {
