@@ -22,6 +22,12 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	
 	Player Player = new Player(this);
 	public static int menuState = 0;
+	public static BufferedImage title2;
+	public static boolean hoveringSecret = false;
+	public static int submenuOption = 0;
+	public static BufferedImage optionsMenu;
+	public static BufferedImage aboutMenu;
+	
 	public static Thread thread;
 	public static int mapX = 0;
 	public static int mapY = 0;	
@@ -79,7 +85,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					bounds[i][x] = new ArrayList<Rectangle>();
 				}
 			}
-			screens[0] = ImageIO.read(new File("assets/gameScreens/titlescreen.png"));
+			title2 = ImageIO.read(new File("assets/gameScreens/titleScreen2.png"));
+			optionsMenu = ImageIO.read(new File("assets/gameScreens/optionsMenu.png"));
+			aboutMenu = ImageIO.read(new File("assets/gameScreens/aboutMenu.png"));
+			screens[0] = ImageIO.read(new File("assets/gameScreens/titleScreen.png"));
 			screens[1] = ImageIO.read(new File("assets/gameScreens/whitespace2.png"));
 			screens[2] = ImageIO.read(new File("assets/gameScreens/omorimap2.png"));
 			screens[3] = ImageIO.read(new File("assets/gameScreens/blackspace.png"));
@@ -94,7 +103,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			for (int i = 1; i < 4; i++) {
 				mainScript[i] = new Text(new BufferedReader(new FileReader("assets/scripts/script" + i + ".txt")), false);
 			}
-			interactablesScript[1].add(new Text("Pills. Take them?", true));
+			interactablesScript[1].add(new Text("Unknown pills. They're labelled HIGHLY POISONOUS. Take them?", true));
 			interactablesScript[1].add(new Text(new BufferedReader(new FileReader("assets/scripts/journal.txt")), false));
 			interactablesScript[1].get(1).getSlides().add(0, new String[] {"SUNNY'S JOURNAL", "", ""});
 			interactablesScript[1].add(new Text("meow.", false));
@@ -107,7 +116,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.out.println("fail");
 		} catch (FontFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -119,7 +127,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		interactables[1].add(new Rectangle(1140, 1120, 60, 80)); // the book
 		interactables[1].add(new Rectangle(980, 1260, 60, 70)); // the cat
 
-		interactables[3].add(new Rectangle(1464, 1598, 40, 80)); // th epills
+		interactables[3].add(new Rectangle(1464, 1598, 40, 80)); // the pills
 		interactables[3].add(new Rectangle(1686, 1716, 60, 80)); // the book
 		interactables[3].add(new Rectangle(1450, 1782, 90, 70)); // the cat
 		
@@ -252,8 +260,20 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		} 
 		
 		if (menuState == 0) {
-			g2d.drawImage(screens[0], 0, 0, null);
-
+			if (submenuOption == 0) {
+				if (hoveringSecret) {
+					g2d.drawImage(title2, 0, 0, null);
+				}
+				else {
+					g2d.drawImage(screens[0], 0, 0, null);
+				}
+			}
+			else if (submenuOption == 1) {
+				g2d.drawImage(optionsMenu, 0, 0, null);
+			}
+			else if (submenuOption == 2) {
+				g2d.drawImage(aboutMenu, 0, 0, null);
+			}
 		}
 		else if (menuState > 0) {
 			try {
@@ -325,8 +345,18 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				e.printStackTrace();
 			}
 			int posX = mapX;
-			int posY = mapY;			
-			if (menuState > 0) {
+			int posY = mapY;
+			if (menuState == 0 && submenuOption == 0) {
+				if (within(new Rectangle(416, 93, 63, 49), getMousePosition()) || within(new Rectangle(424, 59, 47, 33), getMousePosition()) && !hoveringSecret) {
+					System.out.println("hovering");
+					hoveringSecret = true;
+				}
+				else {
+					hoveringSecret = false;
+				}
+				repaint();
+			}
+			else if (menuState > 0) {
 				if(up && withinBounds(bounds[menuState], new Point(posX, posY - charSpeed))) {
 					Player.key = 1;
 					// playerY -= 10;
@@ -441,6 +471,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	}
 
 	public boolean within(Rectangle r, Point p) {
+		if (p == null) return false;
 		if (r.x < p.x && p.x < r.x + r.width) {
 			if (r.y < p.y && p.y < r.y + r.height) {
 				return true;
@@ -489,22 +520,34 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		mouseY = e.getY();
 		
 		if (menuState == 0) {
-			// play game
-			if (within(new Rectangle(142, 545, 169, 40), getMousePosition())) {
-				menuState = 1;
-				System.out.println("clicked");
-				mapX = 1050;
-				mapY = 1200;
-			}
-			// options
-			else if (within(new Rectangle(381, 545, 155, 40), getMousePosition())) {
+			if (submenuOption == 0) {
 				
-			}		
+				// play game
+				if (within(new Rectangle(142, 545, 169, 40), getMousePosition())) {
+					menuState = 1;
+					System.out.println("clicked");
+					mapX = 1050;
+					mapY = 1200;
+				}
+				// options
+				else if (within(new Rectangle(381, 545, 155, 40), getMousePosition())) {
+					submenuOption = 1;
+				}		
+				
+				// quit
+				else if (within(new Rectangle(616, 545, 139, 40), getMousePosition())) {
+					System.exit(0);
+				}
+				else if (hoveringSecret) {
+					submenuOption = 2;
+				}
+			}
+			else if (submenuOption == 1 || submenuOption == 2) {
+				if (within(new Rectangle(45, 548, 169, 40), getMousePosition())) {
+					submenuOption = 0;
+				}
+			}
 			
-			// quit
-			else if (within(new Rectangle(616, 545, 139, 40), getMousePosition())) {
-				System.exit(0);
-			}		
 		}
 		repaint();	
 		
@@ -523,9 +566,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	}
 
 	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
+	public void mouseEntered(MouseEvent e) throws NullPointerException{
 	}
 
 	@Override
@@ -543,10 +584,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	@Override
 	public void keyPressed(KeyEvent e) {
 		int key = e.getKeyCode();
-		if (menuState == 0) {
-			
-		}
-		else if (menuState > 0) {
+
+		if (menuState > 0) {
 			// w
 			if(key == 38 && !speaking) {
 				up = true;

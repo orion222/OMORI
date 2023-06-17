@@ -63,7 +63,6 @@ public class Text {
 				ind = line.length();
 			}
 			else {
-				System.out.println(line.toString());
 				slide[lineInd] = line.toString();
 				line.delete(0, line.length());
 				line.append(cur + " ");
