@@ -27,6 +27,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public static int submenuOption = 0;
 	public static BufferedImage optionsMenu;
 	public static BufferedImage aboutMenu;
+	public static BufferedImage inventoryMenu;
+	public static boolean showInventory = false;
 	
 	public static Thread thread;
 	public static int mapX = 0;
@@ -57,6 +59,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public static ArrayList<Rectangle>[] entrances = new ArrayList[4];
 	
 	static Font speakingFont;
+	static Font inventoryFont;
 	
 	Audio sound = new Audio();
 	static boolean[] settingSongPlayed = new boolean[4];
@@ -91,6 +94,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			title2 = ImageIO.read(new File("assets/gameScreens/titleScreen2.png"));
 			optionsMenu = ImageIO.read(new File("assets/gameScreens/optionsMenu.png"));
 			aboutMenu = ImageIO.read(new File("assets/gameScreens/aboutMenu.png"));
+			inventoryMenu = ImageIO.read(new File("assets/gameScreens/inventoryMenu.png"));
 			screens[0] = ImageIO.read(new File("assets/gameScreens/titleScreen.png"));
 			screens[1] = ImageIO.read(new File("assets/gameScreens/whitespace2.png"));
 			screens[2] = ImageIO.read(new File("assets/gameScreens/omorimap2.png"));
@@ -101,6 +105,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			speechBoxes[3] = ImageIO.read(new File("assets/scripts/sunny.png"));
 			selector = ImageIO.read(new File("assets/scripts/select.png"));
 			speakingFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/fonts/OMORI_GAME2.ttf")).deriveFont(50f);
+			inventoryFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/fonts/OMORI_GAME2.ttf")).deriveFont(30f);
+
 			
 			// script reading
 			for (int i = 1; i < 4; i++) {
@@ -112,9 +118,18 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			interactablesScript[1].add(new Interactable("meow.", false, "cat", 0));
 			interactablesScript[2].add(new Interactable("Grab a piece of green melon?", true, "Green melon", 10));
 			interactablesScript[2].add(new Interactable("Grab a piece of green melon?", true, "Green melon", 10));
-			interactablesScript[2].add(new Interactable("Grab an apple out of the picnic box?", true, "picnic", 30));
-			interactablesScript[2].add(new Interactable("Grab a slice of chicken?", true, "chicken", 30));
+			interactablesScript[2].add(new Interactable("Grab an apple out of the picnic box?", true, "Picnic", 30));
+			interactablesScript[2].add(new Interactable("Grab a slice of chicken?", true, "Chicken", 30));
 			interactablesScript[2].add(new Interactable("Grab a piece of blue melon?", true, "Blue melon", 15));
+			
+			
+			backpack.put("Green melon", 0);
+			backpack.put("Blue melon", 0);
+			backpack.put("Picnic", 0);
+			backpack.put("Chicken", 0);
+
+
+
 		}
 		catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -321,8 +336,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 							try {
 								sound.playSoundEffect(2);
 								String curItem = interactablesScript[menuState].get(interactableScript).getName();
-								backpack.putIfAbsent(curItem, 0);
 								backpack.put(curItem, backpack.get(curItem) + 1);
+								healsVisited[interactableScript] = true;
 								System.out.println("bagged");
 							} catch (LineUnavailableException | IOException e) {
 								// TODO Auto-generated catch block
@@ -348,6 +363,15 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						
 						}
 					}
+				}
+				else if (showInventory) {
+					g2d.setFont(inventoryFont);
+					g2d.drawImage(inventoryMenu, 0, 349, null);
+					g2d.drawString("x " + backpack.get("Green melon"), 239, 505);
+					g2d.drawString("x " + backpack.get("Blue melon"), 400, 505);
+					g2d.drawString("x " + backpack.get("Picnic"), 561, 505);
+					g2d.drawString("x " + backpack.get("Chicken"), 715, 505);
+
 				}
 
 			} catch (InterruptedException e) {
@@ -645,24 +669,21 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				int b = mapY;
 				for (int i = 0; i < interactables[menuState].size(); i++) {
 					if (interact(interactables[menuState].get(i), new Point(a, b))) {
+						if (menuState == 2 && healsVisited[i]) continue;
 						System.out.println("Interacted");
 						try {
 							sound.playSoundEffect(7);
-						} catch (LineUnavailableException | IOException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-						if (interactablesScript[menuState].get(i) != null) {
-							speaking = true;
-							interactableScript = i;
-							System.out.println("yay");
-						
-							// if the interactable prompts the user to make a choice
-							if (interactablesScript[menuState].get(i).getChoice()) {
-								choosing = true;
-							}
+						} catch (LineUnavailableException | IOException e1) { e1.printStackTrace();}
+						speaking = true;
+						interactableScript = i;
+						System.out.println("yay");
+					
+						// if the interactable prompts the user to make a choice
+						if (interactablesScript[menuState].get(i).getChoice()) {
+							choosing = true;
 						}
 					}
+					
 				}
 			}
 			// x flip page / script
@@ -674,6 +695,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			}
 			else if (key == 16 && !speaking) {
 				charSpeed = 4;
+			}
+			// inventory
+			else if (key == 67 && !speaking) {
+				showInventory ^= true;
 			}
 		}
 		repaint();
