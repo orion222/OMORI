@@ -11,37 +11,66 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.util.*;
 
-public class hi extends JPanel implements KeyListener, MouseListener, Runnable, ActionListener{
+public class hi extends JPanel implements KeyListener, MouseListener, Runnable{
 
 	boolean up, down, left, right; // movement in a direction
 	ArrayList<Image> playerImages = new ArrayList<>(); // arraylist of player images
 	int playerIndex = 1; // which image to display of player
 	int playerX = 400, playerY = 250;
+	int xCounter = 0;
+	int yCounter = 0;  // mod 100 
 	
 	ye ye = new ye(this);
 	public static int menuState = 0;
+	public static BufferedImage title2;
+	public static boolean hoveringSecret = false;
+	public static int submenuOption = 0;
+	public static BufferedImage optionsMenu;
+	public static BufferedImage aboutMenu;
+	
 	public static Thread thread;
 	public static int mapX = 0;
 	public static int mapY = 0;	
 	public static BufferedImage[] screens = new BufferedImage[5];
-	public static BufferedImage[] speechBoxes = new BufferedImage[3];
+	public static BufferedImage[] speechBoxes = new BufferedImage[4];
 	public static int mouseX;
 	public static int mouseY;
 	public static int windowWidth = 900;
 	public static int windowHeight = 600;
 	
-	static boolean speaking = false;
+	static boolean speaking = true;
 	static int speakingInd = 0;
 	static boolean[] scriptRead = new boolean[4];
+	static Text[] mainScript = new Text[4];
+	static BufferedImage selector;
+	static ArrayList<Text>[] interactablesScript = new ArrayList[4];
+	static int interactableScript = -1;
+	static boolean choosing = false;
+	static boolean choice = true;
+	
 	static int charHeight = 66;
 	static int charWidth = 63;
 	static int charSpeed = 2;
 	public static ArrayList<Rectangle>[] interactables = new ArrayList[4];
+
 	public static ArrayList<Rectangle>[][] bounds = new ArrayList[4][2];
 	public static ArrayList<Rectangle>[] entrances = new ArrayList[4];
 	
 	static Font speakingFont;
-	static Timer timer;
+	
+//	Audio sound = new Audio(this);
+	static int lastPlayedSoundEffect;
+	static boolean[] settingSongPlayed = new boolean[4];
+	
+	public static boolean fight = false;
+	public static int fightState = 0; // 1 --> fight or run? // 2 --> attack or snack? // 3 --> snacks
+	public static int appear = 0;
+	public static BufferedImage bossBackground;
+	public static int curPosX = 0;
+	public static int tempX = 400;
+	public static int tempY = 250;
+	public static BufferedImage[] fightImages = new BufferedImage[8];
+	
 	public hi() {
 		setPreferredSize(new Dimension(900, 600));
 		setBackground(new Color(200, 0, 0));
@@ -57,39 +86,99 @@ public class hi extends JPanel implements KeyListener, MouseListener, Runnable, 
 				
 				playerImages.add(image);
 			}
-			screens[0] = ImageIO.read(new File("assets/gameScreens/titlescreen.png"));
+
+			for (int i = 0; i < 4; i++) {
+				interactables[i] = new ArrayList<Rectangle>();
+				interactablesScript[i] = new ArrayList<Text>();
+				entrances[i] = new ArrayList<Rectangle>();
+				for (int x = 0; x < 2; x++) {
+					bounds[i][x] = new ArrayList<Rectangle>();
+				}
+			}
+			title2 = ImageIO.read(new File("assets/gameScreens/titleScreen2.png"));
+			optionsMenu = ImageIO.read(new File("assets/gameScreens/optionsMenu.png"));
+			aboutMenu = ImageIO.read(new File("assets/gameScreens/aboutMenu.png"));
+			screens[0] = ImageIO.read(new File("assets/gameScreens/titleScreen.png"));
 			screens[1] = ImageIO.read(new File("assets/gameScreens/whitespace2.png"));
-			screens[2] = ImageIO.read(new File("assets/gameScreens/omorimap2.png"));	
-		    
+			screens[2] = ImageIO.read(new File("assets/gameScreens/mapwithboss.png"));
+//			screens[2] = ImageIO.read(new File("assets/gameScreens/omorimap2.png")); -- replace after boss is defeated
+			screens[3] = ImageIO.read(new File("assets/gameScreens/blackspace.png"));
+			speechBoxes[0] = ImageIO.read(new File("assets/scripts/speechBox.png"));
 			speechBoxes[1] = ImageIO.read(new File("assets/scripts/sunny.png"));
 			speechBoxes[2] = ImageIO.read(new File("assets/scripts/kel.png"));
+			speechBoxes[3] = ImageIO.read(new File("assets/scripts/sunny.png"));
+			selector = ImageIO.read(new File("assets/scripts/select.png"));
 			speakingFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/fonts/OMORI_GAME2.ttf")).deriveFont(50f);
+			fightImages[0] = ImageIO.read(new File("assets/boss/bossBackground.png"));
+			fightImages[1] = ImageIO.read(new File("assets/boss/fightorrun.png"));	
+			fightImages[2] = ImageIO.read(new File("assets/boss/fightselected.png"));	
+			fightImages[3] = ImageIO.read(new File("assets/boss/runSelected.png"));	
+			fightImages[4] = ImageIO.read(new File("assets/boss/attackorsnack.png"));	
+			fightImages[5] = ImageIO.read(new File("assets/boss/attackSelected.png"));	
+			fightImages[6] = ImageIO.read(new File("assets/boss/snackSelected.png"));	
+			fightImages[7] = ImageIO.read(new File("assets/boss/snackChoices.png"));	
+			
+			// script reading
+			for (int i = 1; i < 4; i++) {
+				mainScript[i] = new Text(new BufferedReader(new FileReader("assets/scripts/script" + i + ".txt")), false);
+			}
+			interactablesScript[1].add(new Text("Unknown pills. They're labelled HIGHLY POISONOUS. Take them?", true));
+			interactablesScript[1].add(new Text(new BufferedReader(new FileReader("assets/scripts/journal.txt")), false));
+			interactablesScript[1].get(1).getSlides().add(0, new String[] {"SUNNY'S JOURNAL", "", ""});
+			interactablesScript[1].add(new Text("meow.", false));
+			interactablesScript[2].add(new Text("green melon1.", false));
+			interactablesScript[2].add(new Text("green melon2.", false));
+			interactablesScript[2].add(new Text("picnic box.", false));
+			interactablesScript[2].add(new Text("chicken.", false));
+			interactablesScript[2].add(new Text("blue melon.", false));
+			interactablesScript[2].add(new Text("Fight?", true));
 		}
 		catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.out.println("fail");
 		} catch (FontFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		
 
-		for (int i = 0; i < 4; i++) {
-			interactables[i] = new ArrayList<Rectangle>();
-			entrances[i] = new ArrayList<Rectangle>();
-			for (int x = 0; x < 2; x++) {
-				bounds[i][x] = new ArrayList<Rectangle>();
-			}
-		}
-//		interactables[1].add(new Rectangle(980, 1120, 40, 80)); // the pills
-//		interactables[1].add(new Rectangle(1140, 1120, 60, 80)); // the book
-//		interactables[1].add(new Rectangle(980, 1260, 60, 70)); // the cat
-//		
+		interactables[1].add(new Rectangle(981, 1120, 40, 80)); // the pills
+		interactables[1].add(new Rectangle(1140, 1120, 60, 80)); // the book
+		interactables[1].add(new Rectangle(980, 1260, 60, 70)); // the cat
+
+		interactables[3].add(new Rectangle(1464, 1598, 40, 80)); // the pills
+		interactables[3].add(new Rectangle(1686, 1716, 60, 80)); // the book
+		interactables[3].add(new Rectangle(1450, 1782, 90, 70)); // the cat
+		
+		interactables[2].add(new Rectangle(1156, 860, 60, 52));
+		interactables[2].add(new Rectangle(650, 1696, 72, 44));
+		interactables[2].add(new Rectangle(2810, 2150, 72, 72));
+		interactables[2].add(new Rectangle(2916, 2268, 74, 68));
+		interactables[2].add(new Rectangle(3722, 2604, 68, 68));
+		interactables[2].add(new Rectangle(2490, 3946, 150, 10));
+		
+		// doors, starting from one on the left. clockwise fashion
+		interactables[3].add(new Rectangle(1248, 1624, 82, 80));
+		interactables[3].add(new Rectangle(1444, 1432, 82, 80));
+		interactables[3].add(new Rectangle(1778, 1480, 82, 80));
+		interactables[3].add(new Rectangle(1854, 1748, 82, 80));
+		interactables[3].add(new Rectangle(1654, 1926, 82, 80));
+		interactables[3].add(new Rectangle(1400, 1890, 82, 80));
+
+
+		
 		bounds[1][0] = interactables[1];
-		bounds[2][1].add(new Rectangle(0, 0, 5000, 5000));
+		bounds[1][1].add(new Rectangle(0, 0, 3000, 3000));
+		
+		// map bounds
+		
+		bounds[2][0] = interactables[2];
+		
+//		bounds[2][1].add(new Rectangle(0,0,5000,5000));
 		bounds[2][1].add(new Rectangle(876, 614, 52, 220));
 		bounds[2][1].add(new Rectangle(834, 810, 130, 150));
-		bounds[2][1].add(new Rectangle(784, 922, 416, 656));
+		bounds[2][1].add(new Rectangle(784, 910, 416, 668));
 		
 		bounds[2][1].add(new Rectangle(1000, 1558, 324, 144));
 		bounds[2][1].add(new Rectangle(1176, 1700, 78, 56));
@@ -111,32 +200,31 @@ public class hi extends JPanel implements KeyListener, MouseListener, Runnable, 
 		bounds[2][1].add(new Rectangle(1948, 970, 84, 48));
 		bounds[2][1].add(new Rectangle(2008, 970, 528, 60));
 		bounds[2][1].add(new Rectangle(2530, 970, 62, 48)); 
-		bounds[2][1].add(new Rectangle(2588, 970, 372, 92)); // 
+		bounds[2][1].add(new Rectangle(2588, 970, 372, 92)); 
 		bounds[2][1].add(new Rectangle(2830, 1060, 28, 372));
 		bounds[2][1].add(new Rectangle(2664, 1430, 305, 34));
-		bounds[2][1].add(new Rectangle(2946, 1462, 24, 114)); //
-		bounds[2][1].add(new Rectangle(2968, 1540, 400, 38)); //ee
-		bounds[2][1].add(new Rectangle(3354, 1316, 14, 234)); // up
+		bounds[2][1].add(new Rectangle(2946, 1462, 24, 114)); 
+		bounds[2][1].add(new Rectangle(2968, 1540, 400, 38)); 
+		bounds[2][1].add(new Rectangle(3354, 1316, 14, 234)); 
 		bounds[2][1].add(new Rectangle(3354, 1316, 130, 28));
 		bounds[2][1].add(new Rectangle(3466, 1200, 18, 140));
 		bounds[2][1].add(new Rectangle(3466, 1200, 190, 34));
-		bounds[2][1].add(new Rectangle(3638, 1232, 18, 772)); //
+		bounds[2][1].add(new Rectangle(3638, 1232, 18, 772)); 
 		
 		bounds[2][1].add(new Rectangle(3496, 1942, 144, 62));
-		bounds[2][1].add(new Rectangle(3122, 1942, 378, 36)); //
+		bounds[2][1].add(new Rectangle(3122, 1942, 378, 36)); 
 		bounds[2][1].add(new Rectangle(3122, 1826, 14, 118));
-		bounds[2][1].add(new Rectangle(2594, 1826, 542, 36)); //
+		bounds[2][1].add(new Rectangle(2594, 1826, 542, 36)); 
 		
 		bounds[2][1].add(new Rectangle(3654, 1998, 358, 8));
 		bounds[2][1].add(new Rectangle(3910, 1998, 98, 400));
 		bounds[2][1].add(new Rectangle(3860, 2176, 100, 100));
 		bounds[2][1].add(new Rectangle(3738, 2220, 200, 150));
-		bounds[2][1].add(new Rectangle(3502, 2286, 506, 814));
-		
+		bounds[2][1].add(new Rectangle(3502, 2286, 506, 400));
 		
 		bounds[2][1].add(new Rectangle(2594, 1826, 30, 100));
 		bounds[2][1].add(new Rectangle(2556, 1882, 68, 690));
-		bounds[2][1].add(new Rectangle(2380, 2570, 656, 32)); // adjust this
+		bounds[2][1].add(new Rectangle(2380, 2570, 656, 32)); 
 		
 		bounds[2][1].add(new Rectangle(2552, 2600, 14, 702));
 		bounds[2][1].add(new Rectangle(2552, 3300, 156, 204));
@@ -146,51 +234,24 @@ public class hi extends JPanel implements KeyListener, MouseListener, Runnable, 
 		bounds[2][1].add(new Rectangle(2482, 3594, 144, 134));
 		bounds[2][1].add(new Rectangle(2498, 3816, 122, 464));
 		
-		//
-		
-		bounds[2][1].add(new Rectangle(1530, 956, 60, 16));
-		// 1532 958 -- 1588 958 // teleport gate thing above fence
-		 
-		// 2786 2094 -- 2846 2110 // gate
-		// 2716 2108 -- 2926 2188 // under gate
-		// 2662 2166 -- 3084 2300 // top part of picnic area and under car
-		// 2662 2222 -- 3426 2446 // big bound
+		bounds[2][1].add(new Rectangle(1530, 956, 60, 16)); // above first gate
+		// area after being teleported
 		bounds[2][1].add(new Rectangle(2786, 2094, 60, 16));
 		bounds[2][1].add(new Rectangle(2716, 2108, 210, 80));
 		bounds[2][1].add(new Rectangle(2662, 2166, 422, 134));
 		bounds[2][1].add(new Rectangle(2662, 2222, 764, 224));
 		
-		entrances[2].add(new Rectangle(1532, 950, 56, 10));
-		entrances[2].add(new Rectangle(2786, 2094, 60, 5));
-		entrances[2].add(new Rectangle(2498, 4274, 122, 10)); 
+		// entrances
+		entrances[2].add(new Rectangle(1532, 950, 56, 10)); // teleport box thing 1
+		entrances[2].add(new Rectangle(2786, 2094, 60, 5)); // teleport box thing 2 *on top of the metal boxes area*
+		entrances[2].add(new Rectangle(2498, 4274, 122, 10)); // exit from map into black space
 		
-		
-		
-		interactables[2].add(new Rectangle(1156, 860, 60, 52));
-		interactables[2].add(new Rectangle(650, 1696, 72, 44));
-		interactables[2].add(new Rectangle(2810, 2150, 72, 72));
-		interactables[2].add(new Rectangle(2916, 2268, 74, 68));
-		interactables[2].add(new Rectangle(3722, 2604, 68, 68));
-		bounds[2][0] = interactables[2];
-		// melon at start
-		// 1176 860 -- 1204 896
-		// melon at bottom of first area
-		// 650 1696 -- 690 1740
-		
-		// picnic box
-		// 2824 2174 -- 2860 2222
-		// turkey
-		// 2942 2268 -- 2990 2320
-		
-		// blue melon
-		// 3742 2620 -- 3784 2656
-		
-		
-		
+		bounds[3][0] = interactables[3];
+		bounds[3][1].add(new Rectangle(0, 0, 4000, 4000));
+		// end map coordinates should be mapX = 1580, mapY = 1690
 		
 		thread = new Thread(this);
 		thread.start();
-		timer = new Timer(250, this);
 	}
 	
 	public static void main(String[] args) {
@@ -208,26 +269,132 @@ public class hi extends JPanel implements KeyListener, MouseListener, Runnable, 
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setFont(speakingFont);
+		g2d.setColor(new Color(255, 255, 255));
+		
+		// play song
+		if (!settingSongPlayed[menuState]) {
+//			try {
+////				sound.playSettingMusic(menuState);
+//				settingSongPlayed[menuState] = true;
+//			} catch (LineUnavailableException | IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+		} 
+		
 		if (menuState == 0) {
-			g2d.drawImage(screens[0], 0, 0, null);
-
-		}
-		else if (menuState == 1) {
-			g2d.drawImage(screens[1], -1 * mapX, -1 * mapY, null);
-			g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
-			
-			if (!scriptRead[menuState]) {
-				g2d.drawImage(speechBoxes[1], 0, 260, null);
+			if (submenuOption == 0) {
+				if (hoveringSecret) {
+					g2d.drawImage(title2, 0, 0, null);
+				}
+				else {
+					g2d.drawImage(screens[0], 0, 0, null);
+				}
+			}
+			else if (submenuOption == 1) {
+				g2d.drawImage(optionsMenu, 0, 0, null);
+			}
+			else if (submenuOption == 2) {
+				g2d.drawImage(aboutMenu, 0, 0, null);
 			}
 		}
-		else if(menuState == 2) {
-			g2d.drawImage(screens[2], -1 * mapX, -1 * mapY, null);
-			g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
-		}
+		else if (menuState > 0) {
+			if(fight) {
+				g2d.drawImage(fightImages[fightState], -100, 0, null);
+				
+				if(speaking) {
+					
+				}
+				else {
+					
+				}
+			}
+			else {
+			
+				try {
+					
+					Thread.sleep(10);
+					g2d.drawImage(screens[menuState], -1 * mapX, -1 * mapY, null);
+					
+					if(appear == 1) {
+						System.out.println("CHANGE: " + mapX + " " + mapY + " PLAYER: " + tempX + " " + tempY);
+						g2d.drawImage(playerImages.get(playerIndex), tempX, tempY, null);
+					}
+					else {
+						g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
+	//					g2d.drawImage(bossImage, bossX, bossY, null);
+					}
+					
+					if(menuState == 2 && mapY >= 3498 && appear == 0) {
+						up = false;
+						down = false;
+						left = false;
+						right = false;
+						
+						appear = 1;
+						curPosX = 2558 - mapX;
+						System.out.println("boss appear: X: " + curPosX);
 	
+					}
+					
+					if (speaking) {	
+						Text cur = null;
+						ArrayList<String[]> curSlides = null; 
+						up = false;
+						down = false;
+						right = false;
+						left = false;
+						if (!scriptRead[menuState]) {
+							g2d.drawImage(speechBoxes[menuState], 0, 260, null);
+							cur = mainScript[menuState];
+							curSlides = cur.getSlides();
+						}
+						else {
+							g2d.drawImage(speechBoxes[0], 0, 434, null);
+							cur = interactablesScript[menuState].get(interactableScript);
+							curSlides = cur.getSlides();
+						}
+						if (speakingInd == cur.getSlidesSize()) {
+							speaking = false;
+							speakingInd = 0;
+							scriptRead[menuState] = true;
+							choosing = false;
+							if (menuState == 1 && interactableScript == 0 && choice) {
+								menuState = 2;
+								System.out.println("new world");
+								mapX = 902;
+								mapY = 644;
+								playerIndex = 1;
+								speaking = true;
+							}
+							if(menuState == 2 && interactableScript == 5 && choice) {
+								System.out.println("start fight");
+								fight = true;
+								
+							}
+							choice = true;
+						}
+						else {
+							g2d.drawString(curSlides.get(speakingInd)[0], 25, 480);
+							g2d.drawString(curSlides.get(speakingInd)[1], 25, 520);
+							g2d.drawString(curSlides.get(speakingInd)[2], 25, 560);			
+							System.out.println(choosing);
+							if (speakingInd == cur.getSlidesSize() - 1 && choosing) {			
+								System.out.println("wagnan");
+								int posx = (choice) ? 200: 525;
+								g2d.drawImage(selector, posx, 540, null);
+							
+							}
+						}
+					}
 
-	
-		
+				} 
+				catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}	
+			}
+		}
 
 	}
 
@@ -239,102 +406,187 @@ public class hi extends JPanel implements KeyListener, MouseListener, Runnable, 
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			int posX = (menuState == 1 || menuState == 2) ? mapX: playerX;
-			int posY = (menuState == 1 || menuState == 2) ? mapY: playerY;			
-			if (menuState > 0) {
-				if(up && withinBounds(bounds[menuState], new Point(posX, posY - charSpeed))) {
-					ye.key = 1;
-					// playerY -= 10;
-					mapY -= charSpeed;
-					ye.timer.start();
-
-
+			int posX = mapX;
+			int posY = mapY;
+			if (menuState == 0 && submenuOption == 0) {
+				if (within(new Rectangle(416, 93, 63, 49), getMousePosition()) || within(new Rectangle(424, 59, 47, 33), getMousePosition()) && !hoveringSecret) {
+					System.out.println("hovering");
+					hoveringSecret = true;
 				}
-				if(down && withinBounds(bounds[menuState], new Point(posX, posY + charSpeed))) {
-					ye.key = 3;
-					// playerY += 10;
-					mapY += charSpeed;
-					ye.timer.start();
-
-
-
+				else {
+					hoveringSecret = false;
 				}
-				if(left && withinBounds(bounds[menuState], new Point(posX - charSpeed, posY))) {
-					ye.key = 2;
-					// playerX -= 10;
-					mapX -= charSpeed;
-					ye.timer.start();
-
-
-
-				}
-				if(right && withinBounds(bounds[menuState], new Point(posX + charSpeed, posY))) {
-					ye.key = 4;
-					// playerX += 10;
-					mapX += charSpeed;
-					ye.timer.start();
-
-				}
-				
-				// if they have left 1 quadrant of the whitespace
-				if (menuState == 1) {
-					if (mapY < 800) {
-						mapY = 1600;
-					}
-					if (mapY > 1600) {
-						mapY = 800;
-					}
-					if (mapX < 450) {
-						mapX = 1650;
-					}
-					if (mapX > 1650) {
-						mapX = 450;
+				repaint();
+			}
+			else if (menuState > 0) {
+				if(appear == 1) {
+					// go to x = 2558, then y = 3970
+//					int curPosX = 2558 - mapX;
+					// pos value means move to right, negative value means move to left
+					
+					
+					for(int i = 0; i < (int)Math.abs(curPosX); i++) {
+//						System.out.println("CHANGE: " + mapX + " " + mapY + " PLAYER: " + tempX + " " + tempY);
+						if(curPosX > 0) {
+							mapX += 1; 
+							tempX -= 1;
+							System.out.println("pos");
+						}
+						else if(curPosX < 0) {
+							mapX -= 1; 
+							tempX += 1; System.out.println("negative");
+						}
+						try {Thread.sleep(20);} 
+						catch (InterruptedException e) {e.printStackTrace();}		
+						repaint();
 					}
 					
-				}
-				
-				if(menuState == 2) {
-					// teleport thing 1
-					if(within(entrances[2].get(0), new Point(mapX, mapY))) {
-						System.out.println("in gate");
-						up = false;
-						down = false;
-						right = false;
-						left = false;
-						mapX = 2816;
-						mapY = 2128;
-						
+					for(int i = 0; i < 59; i ++) {
+						mapY += 10;
+						tempY -= 10;
+						try {Thread.sleep(20);} 
+						catch (InterruptedException e) {e.printStackTrace();}
+						repaint();
 					}
-					// teleport thing 2
-					else if(within(entrances[2].get(1), new Point(mapX, mapY))) {
-						System.out.println("in other gate 2");
-						up = false;
-						down = false;
-						right = false;
-						left = false;
-						mapX = 1560;
-						mapY = 984;
+					
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					if(curPosX > 0) {
+						mapX -= (int)Math.abs(curPosX);
+						mapY -= 590;
+					}
+					else {
+						mapX += (int)Math.abs(curPosX); 
+						mapY -= 590;
+					}
+					
+					repaint();
+					
+					appear = 2;
+//					System.out.println(mapX);
+				}
+				else {
+					if(up && withinBounds(bounds[menuState], new Point(posX, posY - charSpeed))) {
+						ye.key = 1;
+						// playerY -= 10;
+						mapY -= charSpeed;
+						ye.run();
+						System.out.println(mapX + " " + mapY);
+						yCounter = (yCounter - 1) % 1000;
+	
+	
+					}
+					if(down && withinBounds(bounds[menuState], new Point(posX, posY + charSpeed))) {
+						ye.key = 3;
+						// playerY += 10;
+						mapY += charSpeed;
+						ye.run();
+						System.out.println(mapX + " " + mapY);
+						yCounter = (yCounter + 1) % 1000;
+	
+	
+					}
+					if(left && withinBounds(bounds[menuState], new Point(posX - charSpeed, posY))) {
+						ye.key = 2;
+						// playerX -= 10;
+						mapX -= charSpeed;
+						ye.run();
+						System.out.println(mapX + " " + mapY);
+						xCounter = (xCounter - 1) % 1000;
+	
+					}
+					if(right && withinBounds(bounds[menuState], new Point(posX + charSpeed, posY))) {
+						ye.key = 4;
+						// playerX += 10;
+						mapX += charSpeed;
+						ye.run();
+						System.out.println(mapX + " " + mapY);
+						xCounter = (xCounter + 1) % 1000;
+	
+					}
+					
+					// if they have left 1 quadrant of the whitespace
+					if (menuState == 1) {
+						if (mapY < 800) {
+							mapY = 1600;
+						}
+						if (mapY > 1600) {
+							mapY = 800;
+						}
+						if (mapX < 450) {
+							mapX = 1650;
+						}
+						if (mapX > 1650) {
+							mapX = 450;
+						}
 						
 					}
 					
-					else if(within(entrances[2].get(2), new Point(mapX, mapY))) {
-						System.out.println("exit map into black space");
-						
-						up = false;
-						down = false;
-						right = false;
-						left = false;
-						mapX = 1560;
-						mapY = 984;
-						menuState = 3;
+					// map
+					if(menuState == 2) {
+						// teleport thing 1
+						if(within(entrances[2].get(0), new Point(mapX, mapY))) {
+							System.out.println("in gate");
+							up = false;
+							down = false;
+							right = false;
+							left = false;
+							mapX = 2816;
+							mapY = 2128;
+							
+						}
+						// teleport thing 2
+						else if(within(entrances[2].get(1), new Point(mapX, mapY))) {
+							System.out.println("in other gate 2");
+							up = false;
+							down = false;
+							right = false;
+							left = false;
+							mapX = 1560;
+							mapY = 984;
+							
+						}
+						else if(within(entrances[2].get(2), new Point(mapX, mapY))) {
+							System.out.println("exit map into black space");
+							
+							up = false;
+							down = false;
+							right = false;
+							left = false;
+							mapX = 1580;
+							mapY = 1690;
+							menuState = 3;
+						}
 					}
-				}
+					
+					// black space
+					if (menuState == 3) {
+						if (mapY < 1000) {
+							mapY = 2394;
+						}
+						if (mapY > 2394) {
+							mapY = 1000;
+						}
+						if (mapX < 700) {
+							mapX = 2700;
+						}
+						if (mapX > 2700) {
+							mapX = 700;
+						}
+					}
 				
+				}
 			}
 		}
 	}
 
 	public boolean within(Rectangle r, Point p) {
+		if (p == null) return false;
 		if (r.x < p.x && p.x < r.x + r.width) {
 			if (r.y < p.y && p.y < r.y + r.height) {
 				return true;
@@ -351,8 +603,8 @@ public class hi extends JPanel implements KeyListener, MouseListener, Runnable, 
 	
 	
 	public boolean interact(Rectangle r, Point p) {
-		if (r.x <= p.x && p.x <= r.x + r.width) {
-			if (r.y <= p.y && p.y <= r.y + r.height) {
+		if (r.x - 1<= p.x && p.x <= r.x + r.width + 1) {
+			if (r.y - 1 <= p.y && p.y <= r.y + r.height + 1) {
 				return true;
 			}
 		}
@@ -383,17 +635,34 @@ public class hi extends JPanel implements KeyListener, MouseListener, Runnable, 
 		mouseY = e.getY();
 		
 		if (menuState == 0) {
-			// play game
-			if (within(new Rectangle(142, 545, 169, 40), getMousePosition())) {
-				menuState = 2; // for map
-				System.out.println("clicked");
-				mapX = 902;
-				mapY = 644;
+			if (submenuOption == 0) {
 				
-				// 902
-				// 644
+				// play game
+				if (within(new Rectangle(142, 545, 169, 40), getMousePosition())) {
+					menuState = 2;
+					System.out.println("clicked");
+					mapX = 2554;
+					mapY = 3424;
+				}
+				// options
+				else if (within(new Rectangle(381, 545, 155, 40), getMousePosition())) {
+					submenuOption = 1;
+				}		
 				
-			}			
+				// quit
+				else if (within(new Rectangle(616, 545, 139, 40), getMousePosition())) {
+					System.exit(0);
+				}
+				else if (hoveringSecret) {
+					submenuOption = 2;
+				}
+			}
+			else if (submenuOption == 1 || submenuOption == 2) {
+				if (within(new Rectangle(45, 548, 169, 40), getMousePosition())) {
+					submenuOption = 0;
+				}
+			}
+			
 		}
 		repaint();	
 		
@@ -412,9 +681,7 @@ public class hi extends JPanel implements KeyListener, MouseListener, Runnable, 
 	}
 
 	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
+	public void mouseEntered(MouseEvent e) throws NullPointerException{
 	}
 
 	@Override
@@ -429,38 +696,115 @@ public class hi extends JPanel implements KeyListener, MouseListener, Runnable, 
 		
 	}
 
+//	fightImages[0] = ImageIO.read(new File("assets/boss/bossBackground.png"));
+//	fightImages[1] = ImageIO.read(new File("assets/boss/fightorrun.png"));	
+//	fightImages[2] = ImageIO.read(new File("assets/boss/fightselected.png"));	
+//	fightImages[3] = ImageIO.read(new File("assets/boss/runSelected.png"));	
+//	fightImages[4] = ImageIO.read(new File("assets/boss/attackorsnack.png"));	
+//	fightImages[5] = ImageIO.read(new File("assets/boss/attackSelected.png"));	
+//	fightImages[6] = ImageIO.read(new File("assets/boss/snackSelected.png"));	
+//	fightImages[7] = ImageIO.read(new File("assets/boss/snackChoices.png"));	
+	
 	@Override
 	public void keyPressed(KeyEvent e) {
-		System.out.println(mapX + " " + mapY);
 		int key = e.getKeyCode();
-		if (menuState > 0) {
+		if(fight) {
+			if(fightState < 4) {
+				if(key == 38 && !speaking) {
+					fightState = 2; // fight selected
+				}
+				else if(key == 40 && !speaking) {
+					fightState = 3; // run selected
+				}
+
+				if(key == 88) {
+					if(fightState == 2) { // user chooses to fight
+						fightState = 4; 
+					}
+					else if(fightState == 3) { // user chooses to run
+						fight = false;
+						fightState = 0;
+					}
+				}
+			}
+			else if(fightState >= 4) {
+				if(key == 37 && !speaking) {
+					fightState = 5; // atack selected
+				}
+				else if(key == 39 && !speaking) {
+					fightState = 6; // snack selected
+				}
+				
+				if(key == 88) {
+					if(fightState == 5) {
+						// run attack method or soething
+					}
+					else if(fightState == 6) {
+						fightState = 7; // open snack menu
+					}
+				}
+			}
+			
+		}
+
+		else if (menuState > 0 && appear != 1) {
 			// w
-			if(key == 38) {
+			if(key == 38 && !speaking) {
 				up = true;
 			}
 			// a
 			else if(key == 37) {
-				left = true;
-
+				
+				if (speaking) choice = true;
+				else left = true;
 			}
 			// s
-			else if(key == 40) {
+			else if(key == 40 && !speaking) {
 				down = true;
 
 			}
 			// d
 			else if(key == 39) {
-				right = true;
+				if (speaking) choice = false;
+				else right = true;
 
 			}
-			else if (key == 90) {
-				int a = (menuState == 1) ? mapX: playerX;
-				int b = (menuState == 1) ? mapY: playerY;
-				for (Rectangle i: interactables[menuState]) {
-					if (interact(i, new Point(a, b))) {
+			// z interact
+			if (key == 90 && !speaking) {
+				int a = mapX;
+				int b = mapY;
+				for (int i = 0; i < interactables[menuState].size(); i++) {
+					if (interact(interactables[menuState].get(i), new Point(a, b))) {
 						System.out.println("Interacted");
+//						try {
+//							sound.playSoundEffect(7);
+////							lastPlayedSoundEffect = 7;
+//						} catch (LineUnavailableException | IOException e1) {
+//							// TODO Auto-generated catch block
+//							e1.printStackTrace();
+//						}
+						if (interactablesScript[menuState].get(i) != null) {
+							speaking = true;
+							interactableScript = i;
+							System.out.println("yay");
+						
+							// if the interactable prompts the user to make a choice
+							if (interactablesScript[menuState].get(i).getChoice()) {
+								choosing = true;
+							}
+						}
 					}
 				}
+			}
+			// x flip page / script
+			else if (key == 88) {
+				if (speaking) {
+					speakingInd++;
+					System.out.println('x');
+				}
+			}
+			else if (key == 16 && !speaking) {
+				charSpeed = 4;
 			}
 		}
 		repaint();
@@ -471,41 +815,43 @@ public class hi extends JPanel implements KeyListener, MouseListener, Runnable, 
 	public void keyReleased(KeyEvent e) {
 		// TODO Auto-generated method stub
 		int key = e.getKeyCode();
-		if (menuState > 0) {
+		if (menuState > 0 && !speaking && appear != 1) {
 			// w
 			if(key == 38) {
 				System.out.println("w releaes");
 				up = false;
-				playerIndex = 10;
+				if(!up && !down && !left && !right) playerIndex = 10;
+				yCounter = 0;
 			}
 			// a
 			else if(key == 37) {
+				
 				System.out.println("a relaes");
 				left = false;
-				playerIndex = 4;
+				if(!up && !down && !left && !right) playerIndex = 4;
+				xCounter = 0;
 			}
 			// s
 			else if(key == 40) {
 				System.out.println("s release");
 				down = false;
-				playerIndex = 1;
+				if(!up && !down && !left && !right) playerIndex = 1;
+				yCounter = 0;
 			}
 			// d
 			else if(key == 39) {
 				System.out.println("d release");
 				right = false;
-				playerIndex = 7;
+				if(!up && !down && !left && !right) playerIndex = 7;
+				xCounter = 0;
 			}
-			ye.timer.stop();
+			else if (key == 16) {
+				charSpeed = 2;
+			}
 		}
 		repaint();
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
 
 
 }
