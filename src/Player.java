@@ -32,6 +32,8 @@ public class Player extends JPanel implements Runnable{
 
 
 	@Override
+	// movement frames change at specified intervals. 
+	// movement frames will change faster if running.
 	public void run() {
 		
 		// TODO Auto-generated method stub

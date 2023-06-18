@@ -64,7 +64,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	
 	// menu variables
 	Player Player = new Player(this);
-	public static int menuState = 0;
 	public static BufferedImage title2;
 	public static boolean hoveringSecret = false;
 	public static int submenuOption = 0;
@@ -72,7 +71,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public static BufferedImage aboutMenu;
 	public static BufferedImage inventoryMenu;
 	public static boolean showInventory = false;
-	
+	public static int menuState = 0;
+
 	// images
 	public static BufferedImage[] screens = new BufferedImage[5];
 	public static BufferedImage[] speechBoxes = new BufferedImage[5];
@@ -1329,10 +1329,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						speakingInd++;
 						System.out.println('x');
 					}
-					// on win screen. go back to main menu
-					if (menuState == 4) {
-						menuState = 0;
-					}
+
 				}
 				// run faster by holding shift
 				else if (key == 16 && !speaking) {
@@ -1343,7 +1340,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					showInventory ^= true;
 				}
 			}
+			else if (key == 88 && menuState == 4) {
+				menuState = 0;
+			}
 		}
+		
 		catch (LineUnavailableException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

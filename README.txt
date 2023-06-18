@@ -17,6 +17,10 @@ gameplay
 - there is a secret door that allows you to get on the roof of the buildings
 - well its not really a secret, but if you explore enough you'll find an opening
 
+- during battle, you need to use your arrow keys to choose an option
+- use X to select whatever button you want.
+- also, you cannot beat the boss without any heals
+
 - after you beat the boss, you will be taken to BLACKSPACE
 - read the book, find the correct door to exit the game or you will be punished
 
@@ -28,8 +32,12 @@ FUNCTIONALITIES
 BUGS 
 - when you interact with an object while moving, you will be stuck in that animation
   frame until you start moving again.
+- after you beat the boss, his ending dialogue is cut short
+- if u lose to the boss, a small frame of no dialogue is shown
 
 
 OTHER INFO
 - have fun
+- history and more info on 
+https://github.com/Coders222/omori---ics4u
 
