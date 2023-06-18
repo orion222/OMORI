@@ -7,6 +7,10 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.*;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.util.*;
@@ -92,12 +96,15 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public static int dialogue = 0;
 	public static BufferedImage[] damageText = new BufferedImage[10];
 	public static BufferedImage gameOver;
+	public static AudioInputStream music, music2;
+	public static Clip bossMusic, gameOverMusic;
+	public static boolean test = false;
 	
 	static boolean[] healsVisited = new boolean[6];
 	static boolean[] doorsVisited = new boolean[10];  
 	HashMap<String, Integer> backpack = new HashMap<String, Integer>();
 	
-	public Main() {
+	public Main() throws UnsupportedAudioFileException, LineUnavailableException {
 		setPreferredSize(new Dimension(windowWidth, windowHeight));
 		setBackground(new Color(200, 0, 0));
 		addKeyListener(this);
@@ -163,6 +170,16 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			bossDialogue[6] = "You never had a chance!";
 			
 			gameOver = ImageIO.read(new File("assets/gameScreens/gameOver.png"));
+			
+			music = AudioSystem.getAudioInputStream(new File("assets/music/bossMusic.wav"));
+			bossMusic = AudioSystem.getClip();
+		    bossMusic.open(music);
+		    
+		    music2 = AudioSystem.getAudioInputStream(new File("assets/music/over.wav"));
+			gameOverMusic = AudioSystem.getClip();
+		    gameOverMusic.open(music2);
+		    
+			
 			
 			for(int i = 0; i < 10; i++) {
 				damageText[i] = ImageIO.read(new File("assets/boss/numbers/" + i + ".png"));
@@ -322,7 +339,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		thread.start();
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws UnsupportedAudioFileException, LineUnavailableException {
 		System.out.println("bop");
 		frame = new JFrame("OMORI");
 		panel = new Main();
@@ -381,20 +398,31 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		else if (menuState > 0 && menuState < 4) {
 		
 			if(fight) {
+			    
+				// when user is defeated
 				if(playerHealth <= 0) {
 					playerHealth = 0;
 					fightState = 0;
+					if (bossMusic != null && bossMusic.isRunning()) {
+				        bossMusic.stop();
+				    }
 				
 				}
+				// when boss is defeated
 				if(bossHealth <= 0) {
 					fightState = 0;
 					bossHealth = 0;
+					if (bossMusic != null && bossMusic.isRunning()) {
+				        bossMusic.stop();
+				    }
 					try {
 						screens[2] = ImageIO.read(new File("assets/gameScreens/omorimap2.png"));
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 					if(bounds[2][0].size() == 6) bounds[2][0].remove(5);
+					
+					
 				}
 				
 				
@@ -446,7 +474,14 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				
 			}
 			else if(playerHealth <= 0) {
-				g2d.drawImage(gameOver, 0, 0, null);
+				g2d.drawImage(gameOver, 0, -100, null);
+				bossMusic.stop();
+				bossMusic.close();
+				if(!gameOverMusic.isRunning()) {
+					gameOverMusic.setFramePosition(0);
+					gameOverMusic.start();
+				    gameOverMusic.loop(Clip.LOOP_CONTINUOUSLY);
+				}
 			}
 			
 			else {
@@ -511,6 +546,12 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 							else if (menuState == 2 && choice && scriptRead[menuState]) {
 								if(interactableScript == 5) {
 									fight = true;
+									sound.settingMusic.stop();
+								
+									bossMusic.setFramePosition(0);
+									bossMusic.start();
+								    bossMusic.loop(Clip.LOOP_CONTINUOUSLY);
+								    
 									System.out.println("start fight");
 								}
 								else {
@@ -722,8 +763,20 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						}
 						if(fight == false && (bossHealth <= 0 || playerHealth <= 0)) {
 							repaint();
+							
+							if(!test) {
+								test = true;
+								try {
+									sound.mapSongs[2] = AudioSystem.getAudioInputStream(new File("assets/music/ForestChillin.wav"));
+									sound.playSettingMusic(menuState);
+								} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								
+							}
 						}
-						if(!turn && bossHealth > 0) {
+						if(!turn && bossHealth > 0 && fight) {
 							
 							try {
 								Thread.sleep(1000);
@@ -742,6 +795,12 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 							// for user getting hit .. 220,150 + 225, 150
 							tempX = 220;
 							tempY = 150;
+							try {
+								sound.playSoundEffect(11);
+							} catch (LineUnavailableException | IOException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
 							
 							
 							repaint();
@@ -822,6 +881,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	}
 	
 
+	
+
 	public boolean within(Rectangle r, Point p) {
 		if (p == null) return false;
 		if (r.x < p.x && p.x < r.x + r.width) {
@@ -880,7 +941,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						System.out.println("clicked");
 						mapX = 2554; // 1050
 						mapY = 3424; // 1200
-						fight = true;
 						sound.playSoundEffect(7);
 					}
 					// options
@@ -947,211 +1007,244 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	@Override
 	public void keyPressed(KeyEvent e) {
 		int key = e.getKeyCode();
-
-		if(fight && turn && damage == 0) {
-			// user can select between fighting or running
-			if(fightState < 4) {
-				if(key == 38) {
-					fightState = 2; // fight selected
-				}
-				else if(key == 40) {
-					fightState = 3; // run selected
-				}
-
-				if(key == 88) {
-					if(fightState == 2) { // user chooses to fight
-						fightState = 4; 
-					}
-					else if(fightState == 3) { // user chooses to run
-						fight = false;
-						fightState = 1;
-					}
-				}
-			}
-			// user can choose between attacking and snacking / gain hp
-			else if(fightState >= 4 && fightState <= 6) {
-				if(key == 37) {
-					fightState = 5; // atack selected
-				}
-				else if(key == 39) {
-					fightState = 6; // snack selected
-				}
-				
-				if(key == 88) {
-					if(fightState == 5) {
-						// run attack method or soething
-						damage = (int) (Math.random() * (100 - 100 + 1) + 100);
-						bossHealth -= damage;
-						// 20 - 40 damage // max - min + 1 + min
-						
-						turn = false;
-						tempX = 600;
-						tempY = 100;
-						
-						
-						
-					}
-					else if(fightState == 6) {
-						fightState = 7; // open snack menu
-						
-					}
-				}
-			}
-			// user can select which snack to eat
-			else if(fightState >= 7) {
-				if(fightState == 7 && (key == 40 || key == 39)) {
-					fightState = 8; // green melon
-				}
-				else if(fightState == 12) {
-					if(key == 40) { // go bck down to melon
-						fightState = 8;
-					}
-					else if(key == 88) { // select back
-						System.out.println("back");
-						fightState = 4;
-					}
-				}
-				
-				else if(fightState >= 8) {
-					if(key == 37) { // choices move to the left
-						fightState--;
-						if(fightState <= 7) fightState = 8;
-					}
-					else if(key == 39) { // choices move to the right
-						fightState++;
-						if(fightState > 11) fightState = 11;
-					}
-					else if(key == 38) {
-						fightState = 12;
-						System.out.println("back");
-					}
-					else if(key == 88) {
-						boolean valid = false;
-						if(fightState == 8) { // select green melon
-							System.out.println("green");
-							if(backpack.get("Green melon") > 0) {
-								playerHealth += 10;
-								valid = true;
-							}
-						}
-						else if(fightState == 9) { // select blue melon
-							System.out.println("blue");
-							if(backpack.get("Blue melon") > 0) {
-								playerHealth += 15;
-								valid = true;
-							}
-						}
-						else if(fightState == 10) { // select picnic
-							System.out.println("picnic");
-							if(backpack.get("Picnic") > 0) {
-								playerHealth += 20;
-								valid = true;
-							}
-						}
-						else if(fightState == 11) { // select chicken
-							System.out.println("chicken");
-							if(backpack.get("Chicken") > 0) {
-								playerHealth += 30;
-								valid = true;
-							}
-						}
-						if(valid) {
-							turn = false;
-							fightState = 0;
-						}
-						
-					}
-				}
-			}
-			
-		}
 		
-		else if (menuState > 0 && appear != 1) {
-			// w
-			if(key == 38 && !speaking) {
-				up = true;
-			}
-			// a
-			else if(key == 37) {
-				
-				if (speaking) choice = true;
-				else left = true;
-			}
-			// s
-			else if(key == 40 && !speaking) {
-				down = true;
-
-			}
-			// d
-			else if(key == 39) {
-				if (speaking) choice = false;
-				else right = true;
-
-			}
-			// z interact
-			if (key == 90 && !speaking) {
-				int a = mapX;
-				int b = mapY;
-				for (int i = 0; i < interactables[menuState].size(); i++) {
-					if (interact(interactables[menuState].get(i), new Point(a, b))) {
-						if (menuState == 2 && healsVisited[i]) continue;
-						System.out.println("Interacted");
-						try {
-							
-							// the doors will play a lock / unlock sound in BLACKSPACE
-							if (menuState == 3 && i < 6) {
-								if (!doorsVisited[i]) {
-									sound.playSoundEffect(8);
-									doorsVisited[i] = true;
-									
-									// win the game
-									if (i == 5) {
-										System.out.println("win");
-										menuState = 4;
-									}
-									else {
-										scare(i);
-										curScare = i;
-									}
-								}
-								else sound.playSoundEffect(9);
-							}
-							// default interact sound
-							else {
-								sound.playSoundEffect(10);
-
-							}
-						} catch (LineUnavailableException | IOException e1) { e1.printStackTrace();}
-						Interactable cur = interactablesScript[menuState].get(i);
-						if (cur != null) {
-							speaking = true;
-							interactableScript = i;
-							System.out.println("yay");
-							
-							// if the interactable prompts the user to make a choice
-							if (cur.getChoice()) {
-								choosing = true;
-							}
+		try {
+			if(fight && turn && damage == 0) {
+				// user can select between fighting or running
+				if(fightState < 4) {
+					if(key == 38) {
+						
+						sound.playSoundEffect(10);
+						fightState = 2; // fight selected
+					}
+					else if(key == 40) {
+						sound.playSoundEffect(10);
+						fightState = 3; // run selected
+					}
+	
+					if(key == 88) {
+						if(fightState == 2) { // user chooses to fight
+							fightState = 4; 
 						}
+						else if(fightState == 3) { // user chooses to run
+							if (bossMusic != null && bossMusic.isRunning()) {
+						        bossMusic.stop();
+						    }
 
+							sound.mapSongs[2] = AudioSystem.getAudioInputStream(new File("assets/music/ForestChillin.wav"));
+							sound.playSettingMusic(menuState);
+
+							fight = false;
+							fightState = 1;
+						}
+					}
+				}
+				// user can choose between attacking and snacking / gain hp
+				else if(fightState >= 4 && fightState <= 6) {
+					if(key == 37) {
+						sound.playSoundEffect(10);
+						fightState = 5; // atack selected
+					}
+					else if(key == 39) {
+						sound.playSoundEffect(10);
+						fightState = 6; // snack selected
 					}
 					
+					if(key == 88) {
+						if(fightState == 5) {
+							// run attack method or soething
+							damage = (int) (Math.random() * (200 - 200 + 1) + 200);
+							bossHealth -= damage;
+							// 20 - 40 damage // max - min + 1 + min
+							
+							turn = false;
+							tempX = 600;
+							tempY = 100;
+							
+							sound.playSoundEffect(11);
+							
+						}
+						else if(fightState == 6) {
+							fightState = 7; // open snack menu
+							
+						}
+					}
+				}
+				// user can select which snack to eat
+				else if(fightState >= 7) {
+					if(fightState == 7 && (key == 40 || key == 39)) {
+						sound.playSoundEffect(10);
+						fightState = 8; // green melon
+					}
+					else if(fightState == 12) {
+						if(key == 40) { // go bck down to melon
+							sound.playSoundEffect(10);
+							fightState = 8;
+						}
+						else if(key == 88) { // select back
+							System.out.println("back");
+							fightState = 4;
+						}
+					}
+					
+					else if(fightState >= 8) {
+						if(key == 37) { // choices move to the left
+							sound.playSoundEffect(10);
+							fightState--;
+							if(fightState <= 7) fightState = 8;
+						}
+						else if(key == 39) { // choices move to the right
+							sound.playSoundEffect(10);
+							fightState++;
+							if(fightState > 11) fightState = 11;
+						}
+						else if(key == 38) {
+							sound.playSoundEffect(10);
+							fightState = 12;
+							System.out.println("back");
+						}
+						else if(key == 88 && playerHealth < 125) {
+							boolean valid = false;
+							if(fightState == 8) { // select green melon
+								System.out.println("green");
+								if(backpack.get("Green melon") > 0) {
+									playerHealth += 10;
+									valid = true;
+								}
+							}
+							else if(fightState == 9) { // select blue melon
+								System.out.println("blue");
+								if(backpack.get("Blue melon") > 0) {
+									playerHealth += 15;
+									valid = true;
+								}
+							}
+							else if(fightState == 10) { // select picnic
+								System.out.println("picnic");
+								if(backpack.get("Picnic") > 0) {
+									playerHealth += 20;
+									valid = true;
+								}
+							}
+							else if(fightState == 11) { // select chicken
+								System.out.println("chicken");
+								if(backpack.get("Chicken") > 0) {
+									playerHealth += 30;
+									valid = true;
+								}
+							}
+							if(valid) {
+								sound.playSoundEffect(6);
+								turn = false;
+								fightState = 0;
+							}
+							
+						}
+					}
+				}
+				
+			}
+			
+			
+			else if (menuState > 0 && appear != 1) {
+				// w
+				if(key == 38 && !speaking) {
+					up = true;
+				}
+				// a
+				else if(key == 37) {
+					
+					if (speaking) choice = true;
+					else left = true;
+				}
+				// s
+				else if(key == 40 && !speaking) {
+					down = true;
+	
+				}
+				// d
+				else if(key == 39) {
+					if (speaking) choice = false;
+					else right = true;
+	
+				}
+				// z interact
+				if (key == 90 && !speaking) {
+					int a = mapX;
+					int b = mapY;
+					for (int i = 0; i < interactables[menuState].size(); i++) {
+						if (interact(interactables[menuState].get(i), new Point(a, b))) {
+							if (menuState == 2 && healsVisited[i]) continue;
+							System.out.println("Interacted");
+							try {
+								
+								// the doors will play a lock / unlock sound in BLACKSPACE
+								if (menuState == 3 && i < 6) {
+									if (!doorsVisited[i]) {
+										sound.playSoundEffect(8);
+										doorsVisited[i] = true;
+										
+										// win the game
+										if (i == 5) {
+											System.out.println("win");
+											menuState = 4;
+										}
+										else {
+											scare(i);
+											curScare = i;
+										}
+									}
+									else sound.playSoundEffect(9);
+								}
+								// default interact sound
+								else {
+									sound.playSoundEffect(10);
+	
+								}
+							} catch (LineUnavailableException | IOException e1) { e1.printStackTrace();}
+							if(menuState != 4) {
+								Interactable cur = interactablesScript[menuState].get(i);
+								if (cur != null) {
+									speaking = true;
+									interactableScript = i;
+									System.out.println("yay");
+									
+									// if the interactable prompts the user to make a choice
+									if (cur.getChoice()) {
+										choosing = true;
+									}
+								}
+							}
+	
+						}
+						
+					}
+				}
+				// x flip page / script
+				else if (key == 88) {
+					if (speaking) {
+						speakingInd++;
+						System.out.println('x');
+					}
+				}
+				else if (key == 16 && !speaking) {
+					charSpeed = 4;
+				}
+				// inventory
+				else if (key == 67 && !speaking) {
+					showInventory ^= true;
 				}
 			}
-			// x flip page / script
-			else if (key == 88) {
-				if (speaking) {
-					speakingInd++;
-					System.out.println('x');
-				}
-			}
-			else if (key == 16 && !speaking) {
-				charSpeed = 4;
-			}
-			// inventory
-			else if (key == 67 && !speaking) {
-				showInventory ^= true;
-			}
+		}
+		catch (LineUnavailableException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (UnsupportedAudioFileException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 		repaint();
 		

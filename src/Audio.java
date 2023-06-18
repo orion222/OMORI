@@ -25,6 +25,7 @@ public class Audio {
 			soundEffectNames.add("unlockDoor");
 			soundEffectNames.add("lockedDoor");
 			soundEffectNames.add("interact");
+			soundEffectNames.add("hit");
 			for (int i = 0; i < soundEffectNames.size(); i++) {
 				soundEffects.add(AudioSystem.getClip());
 				soundEffects.get(i).open(AudioSystem.getAudioInputStream(new File("assets/sounds/" + soundEffectNames.get(i) + ".wav")));
@@ -45,15 +46,19 @@ public class Audio {
 
 	    settingMusic = AudioSystem.getClip();
 	    settingMusic.open(mapSongs[menuState]);
+	    settingMusic.setFramePosition(0);
 	    settingMusic.start();
 	    settingMusic.loop(Clip.LOOP_CONTINUOUSLY);
+	    System.out.println("play it");
 	}
 
 	public void playSoundEffect(int n) throws LineUnavailableException, IOException {
 		System.out.println("BLAH3");
 	    Clip cur = soundEffects.get(n);
+	    cur.stop();
 	    cur.setFramePosition(0);
 	    cur.start();
+	    
 	}
 
 
