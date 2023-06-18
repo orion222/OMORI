@@ -23,9 +23,17 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	int playerX = 400, playerY = 250;
 	int xCounter = 0;
 	int yCounter = 0;  // mod 100 
+	static int scareX = 0;
+	static int scareY = 0;
+	static boolean showScare = false;
+	static int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+	static int direction;
+	static int curScare;
+	public static BufferedImage[] scareImages = new BufferedImage[5];
+	
 	
 	Player Player = new Player(this);
-	public static int menuState = 0;
+	public static int menuState = 3;
 	public static BufferedImage title2;
 	public static boolean hoveringSecret = false;
 	public static int submenuOption = 0;
@@ -35,8 +43,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public static boolean showInventory = false;
 	
 	public static Thread thread;
-	public static int mapX = 0;
-	public static int mapY = 0;	
+	public static int mapX = 1580;
+	public static int mapY = 1690;	
 	// mapX = 1580;
 	// mapY = 1690;
 	public static BufferedImage[] screens = new BufferedImage[5];
@@ -119,6 +127,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			screens[2] = ImageIO.read(new File("assets/gameScreens/mapwithboss.png"));
 //			screens[2] = ImageIO.read(new File("assets/gameScreens/omorimap2.png")); -- replace after boss is defeated
 			screens[3] = ImageIO.read(new File("assets/gameScreens/blackspace.png"));
+			screens[4] = ImageIO.read(new File("assets/gameScreens/winScreen.png"));
 			speechBoxes[0] = ImageIO.read(new File("assets/scripts/speechBox.png"));
 			speechBoxes[1] = ImageIO.read(new File("assets/scripts/sunny.png"));
 			speechBoxes[2] = ImageIO.read(new File("assets/scripts/kel.png"));
@@ -136,7 +145,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			fightImages[5] = ImageIO.read(new File("assets/boss/attackSelected.png"));	
 			fightImages[6] = ImageIO.read(new File("assets/boss/snackSelected.png"));	
 			fightImages[7] = ImageIO.read(new File("assets/boss/snackChoices.png"));	
-			
+			for (int i = 1; i <= 5; i++) {
+				scareImages[i - 1] = ImageIO.read(new File("assets/scareImages/scare" + i + ".png"));	
+
+			}
+
 			// script reading
 			for (int i = 1; i < 4; i++) {
 				mainScript[i] = new Interactable(new BufferedReader(new FileReader("assets/scripts/script" + i + ".txt")), false);
@@ -157,13 +170,14 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 
 			}
 			interactablesScript[3].add(new Interactable("The pill bottle is empty", false, "Pills", 0));
-			interactablesScript[3].add(new Interactable("get me out of here.", false, "Book", 0));
+			interactablesScript[3].add(new Interactable("ONE OF THESE DOORS HAVE AN EXIT. FIND IT", false, "Book", 0));
 			interactablesScript[3].add(new Interactable("meow", false, "Cat", 0));
 
 			backpack.put("Green melon", 0);
 			backpack.put("Blue melon", 0);
 			backpack.put("Picnic", 0);
 			backpack.put("Chicken", 0);
+			
 
 
 
@@ -358,7 +372,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				g2d.drawImage(aboutMenu, 0, 0, null);
 			}
 		}
-		else if (menuState > 0) {
+		else if (menuState > 0 && menuState < 4) {
 			if(fight) {
 				
 				g2d.drawImage(fightImages[fightState], -100, 0, null);
@@ -406,7 +420,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						System.out.println("boss appear: X: " + curPosX);
 	
 					}
-					
+					if (showScare) {
+						g2d.drawImage(scareImages[curScare], scareX, scareY, null);
+					}
 					if (speaking) {
 						
 						Interactable cur = null;
@@ -485,6 +501,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				}
 			}
 		}
+		else {
+			g2d.drawImage(screens[4], 0, 0, null);
+		}
 
 	}
 
@@ -540,7 +559,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					}
 					
 					try {
-						Thread.sleep(500);
+						Thread.sleep(2000);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -561,6 +580,20 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 //					System.out.println(mapX);
 				}
 				else {
+					if (showScare) {
+						scareX += directions[direction][0] * 2;
+						scareY += directions[direction][1] * 2;
+						System.out.println(scareX +  " " + scareY);
+						BufferedImage curImage = scareImages[curScare];
+						int a = curImage.getWidth();
+						int b = curImage.getHeight();
+						if (!within(new Rectangle(-1 * a, -1 * b, windowWidth + 2 * a, windowHeight + 2 * b), new Point(scareX, scareY))) {
+							System.out.println();
+							System.out.println("exit");
+							showScare = false;
+						}
+						repaint();
+					}
 					if(up && withinBounds(bounds[menuState], new Point(posX, posY - charSpeed))) {
 						Player.key = 1;
 						// playerY -= 10;
@@ -881,10 +914,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 									// win the game
 									if (i == 5) {
 										System.out.println("win");
+										menuState = 4;
 									}
 									else {
 										scare(i);
-
+										curScare = i;
 									}
 								}
 								else sound.playSoundEffect(9);
@@ -933,6 +967,29 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 
 		try {
 			sound.playSoundEffect(n);
+			showScare = true;
+			direction = n % 4;
+			// right
+			if (direction == 0) {
+				scareX = -1 *  scareImages[n].getWidth();
+				scareY = windowHeight / 2 - scareImages[n].getHeight() / 2;
+			}
+			// left
+			else if (direction == 1) {
+				scareX = windowWidth + scareImages[n].getWidth();
+				scareY = windowHeight / 2 - scareImages[n].getHeight() / 2;
+			}
+			// down
+			else if (direction == 2) {
+				scareX = windowWidth / 2 - scareImages[n].getWidth() / 2;
+				scareY = -1 * scareImages[n].getHeight();
+			}
+			// up 
+			else if (direction == 3) {
+				scareX = windowWidth / 2 - scareImages[n].getWidth() / 2;
+				scareY = windowHeight + scareImages[n].getHeight();
+			}
+			
 		} catch (LineUnavailableException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
