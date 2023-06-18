@@ -1,5 +1,51 @@
 HI MS WONG. 
 
+RESPONSIBILITIES
+ORION
+- main menu
+  * button functionality
+  * draw submenus
+  * create secret hovering menu
+
+- WHITESPACE
+  * map design
+  * movement
+  * infinite map
+
+- interactables
+  * scripts
+  * selection
+
+- inventory
+  * design and implementation
+
+- BLACKSPACE
+  * map design
+  * infinite map
+  * jumpscares
+
+- Audio
+  * sound effects
+  * map themes
+
+
+NICKY
+
+- JUNKYARD
+ * map design
+ * boundaries
+ * boss animation when you walk close
+ * secret door that puts you on the roof
+
+- BOSS FIGHT
+ * literally everything
+ * design menus
+ * run / fight
+ * randomize damage 
+ * slash animation
+ * menu interaction
+ * lose screen
+
 OK HINTS
 
 main menu:
