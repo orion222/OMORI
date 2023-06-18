@@ -16,15 +16,16 @@ public class Audio {
 			mapSongs[1] = AudioSystem.getAudioInputStream(new File("assets/music/WHITESPACE2.wav"));
 			mapSongs[2] = AudioSystem.getAudioInputStream(new File("assets/music/ForestChillin.wav"));
 			mapSongs[3] = AudioSystem.getAudioInputStream(new File("assets/music/BLACKSPACE.wav"));
-			soundEffectNames.add("scare1");
-			soundEffectNames.add("scare2");
+			for (int i = 1; i <= 5; i++) {
+				soundEffectNames.add("scare" + i);
+			}
 			soundEffectNames.add("getItem");
 			soundEffectNames.add("heal");
 			soundEffectNames.add("selectOption");
 			soundEffectNames.add("unlockDoor");
 			soundEffectNames.add("lockedDoor");
 			soundEffectNames.add("interact");
-			for (int i = 0; i < 8; i++) {
+			for (int i = 0; i < soundEffectNames.size(); i++) {
 				soundEffects.add(AudioSystem.getClip());
 				soundEffects.get(i).open(AudioSystem.getAudioInputStream(new File("assets/sounds/" + soundEffectNames.get(i) + ".wav")));
 			}
