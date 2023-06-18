@@ -395,6 +395,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		}
 		else if (menuState > 0 && menuState < 4) {
 		
+			// when user is fighting boss
 			if(fight) {
 			    
 				// when user is defeated
@@ -423,8 +424,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					
 				}
 				
-				
+				// display boss fight images
 				g2d.drawImage(fightImages[fightState], -100, 0, null);
+				
+				// displaying health of user and boss
 				try {
 					Font healthFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/fonts/OMORI_GAME2.ttf")).deriveFont(30f);
 					g2d.setFont(healthFont);
@@ -443,7 +446,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				
 				g2d.drawString(bossHealth + " / 200", 358, 90);
 				
-				
+				// when snack menu is pulled up
 				if(fightState >= 7) {
 					g2d.drawString("x " + backpack.get("Green melon"), 239, 500);
 					g2d.drawString("x " + backpack.get("Blue melon"), 400, 500);
@@ -451,12 +454,16 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					g2d.drawString("x " + backpack.get("Chicken"), 715, 500);
 				}
 				
+				// when its the boss' turn
 				if(!turn) {
+					// dialogue if user wins/loses
 					if(bossHealth == 0) dialogue = 5;
 					else if(playerHealth == 0) dialogue = 6;
 					
+					// draw the dialogue when the image of boss with dialogue box is displayed
 					if(fightState == 0) g2d.drawString(bossDialogue[dialogue], 200, 420);
 					
+					// if damage has been dealt, display the damage
 					if(damage > 0) {
 						String x = damage + "";
 						System.out.println("DAMAGE: " + x);
@@ -471,6 +478,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				
 				
 			}
+			// when player loses, display game over screen and play the music
 			else if(playerHealth <= 0) {
 				g2d.drawImage(gameOver, 0, -100, null);
 				bossMusic.stop();
@@ -481,20 +489,25 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				    gameOverMusic.loop(Clip.LOOP_CONTINUOUSLY);
 				}
 			}
-			
+			// when player is not fighting, normal gameplay
 			else {
 				try {
 					
 					Thread.sleep(10);
 					g2d.drawImage(screens[menuState], -1 * mapX, -1 * mapY, null);
+					
+					// appear = 1 is animation for boss appearance
 					if(appear == 1) {
 						System.out.println("CHANGE: " + mapX + " " + mapY + " PLAYER: " + tempX + " " + tempY);
+						// tempx and tempy is used to pan the camera towards the boss
 						g2d.drawImage(playerImages.get(playerIndex), tempX, tempY, null);
 					}
+					// display character normally
 					else {
 						g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
 					}
 					
+					// when user goes pass 3498 on the second map, play the animation
 					if(menuState == 2 && mapY >= 3498 && appear == 0) {
 						up = false;
 						down = false;
@@ -502,6 +515,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						right = false;
 						
 						appear = 1;
+						// curPosX is how far the user is from the x value of 2558
 						curPosX = 2558 - mapX;
 						System.out.println("boss appear: X: " + curPosX);
 	
@@ -628,8 +642,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				repaint();
 			}
 			else if (menuState > 0) {
+				// animation of boss
 				if(appear == 1) {
 					
+					// pan camera towards the x-value of 2558
 					for(int i = 0; i < (int)Math.abs(curPosX); i++) {
 //						System.out.println("CHANGE: " + mapX + " " + mapY + " PLAYER: " + tempX + " " + tempY);
 						if(curPosX > 0) {
@@ -646,6 +662,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						repaint();
 					}
 					
+					// panel camera towards the y-value of the boss
 					for(int i = 0; i < 59; i ++) {
 						mapY += 10;
 						tempY -= 10;
@@ -661,6 +678,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						e.printStackTrace();
 					}
 					
+					// reset camera back to original position
 					if(curPosX > 0) {
 						mapX -= (int)Math.abs(curPosX);
 						mapY -= 590;
@@ -768,7 +786,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 									sound.mapSongs[2] = AudioSystem.getAudioInputStream(new File("assets/music/ForestChillin.wav"));
 									sound.playSettingMusic(menuState);
 								} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
 								
@@ -1051,7 +1068,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					if(key == 88) {
 						if(fightState == 5) {
 							// run attack method or soething
-							damage = (int) (Math.random() * (200 - 200 + 1) + 200);
+							damage = (int) (Math.random() * (40 - 20 + 1) + 20);
 							bossHealth -= damage;
 							// 20 - 40 damage // max - min + 1 + min
 							
