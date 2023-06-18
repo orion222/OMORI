@@ -86,19 +86,19 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public static int damage = 0;
 	public static int appear = 0; // initial animation
 	public static boolean turn = true; // initial turn will be player's -- false is boss'
-	public static int curPosX = 0;
-	public static int tempX = 400;
-	public static int tempY = 250;
+	public static int curPosX = 0; //
+	public static int tempX = 400; // animation purposes
+	public static int tempY = 250; //
 	public static BufferedImage[] fightImages = new BufferedImage[13];
-	public static int playerHealth = 125;
-	public static int bossHealth = 200;
+	public static int playerHealth = 125; // player initial hp
+	public static int bossHealth = 200; // boss initial hp
 	public static String[] bossDialogue = new String[7];
 	public static int dialogue = 0;
 	public static BufferedImage[] damageText = new BufferedImage[10];
 	public static BufferedImage gameOver;
 	public static AudioInputStream music, music2;
-	public static Clip bossMusic, gameOverMusic;
-	public static boolean test = false;
+	public static Clip bossMusic, gameOverMusic; // boss bg music and game over music
+	public static boolean test = false; // to replay bg music after defeating boss
 	
 	static boolean[] healsVisited = new boolean[6];
 	static boolean[] doorsVisited = new boolean[10];  
@@ -233,14 +233,12 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		interactables[1].add(new Rectangle(1140, 1120, 60, 80)); // the book
 		interactables[1].add(new Rectangle(980, 1260, 60, 70)); // the cat
 
-
-		
-		interactables[2].add(new Rectangle(1156, 860, 60, 52));
-		interactables[2].add(new Rectangle(650, 1696, 72, 44));
-		interactables[2].add(new Rectangle(2810, 2150, 72, 72));
-		interactables[2].add(new Rectangle(2916, 2268, 74, 68));
-		interactables[2].add(new Rectangle(3722, 2604, 68, 68));
-		interactables[2].add(new Rectangle(2490, 3946, 150, 10));
+		interactables[2].add(new Rectangle(1156, 860, 60, 52)); // green melon
+		interactables[2].add(new Rectangle(650, 1696, 72, 44)); // green melon
+		interactables[2].add(new Rectangle(2810, 2150, 72, 72)); // picnic basket
+		interactables[2].add(new Rectangle(2916, 2268, 74, 68)); // chicken
+		interactables[2].add(new Rectangle(3722, 2604, 68, 68)); // blue melon
+		interactables[2].add(new Rectangle(2490, 3946, 150, 10)); // boss
 		
 		// doors, starting from one on the left. clockwise fashion
 		interactables[3].add(new Rectangle(1248, 1624, 82, 80));
@@ -260,7 +258,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		
 		bounds[2][0] = interactables[2];
 		
-		bounds[2][1].add(new Rectangle(0,0,5000,5000)); // for testing purposes
+//		bounds[2][1].add(new Rectangle(0,0,5000,5000)); // for testing purposes
 		bounds[2][1].add(new Rectangle(876, 614, 52, 220));
 		bounds[2][1].add(new Rectangle(834, 810, 130, 150));
 		bounds[2][1].add(new Rectangle(784, 910, 416, 668));
