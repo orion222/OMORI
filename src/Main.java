@@ -1342,6 +1342,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			}
 			else if (key == 88 && menuState == 4) {
 				menuState = 0;
+				settingSongPlayed = new boolean[5];
+				doorsVisited = new boolean[10];
+				healsVisited = new boolean[6];
 			}
 		}
 		

@@ -60,7 +60,6 @@ public class Audio {
 	    settingMusic.setFramePosition(0);
 	    settingMusic.start();
 	    settingMusic.loop(Clip.LOOP_CONTINUOUSLY);
-	    System.out.println("play it");
 	}
 	
 	// play a sound effect given the index of the sound effect
