@@ -31,9 +31,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	static int curScare;
 	public static BufferedImage[] scareImages = new BufferedImage[5];
 	
-	
 	Player Player = new Player(this);
-	public static int menuState = 3;
+	public static int menuState = 0;
 	public static BufferedImage title2;
 	public static boolean hoveringSecret = false;
 	public static int submenuOption = 0;
@@ -43,8 +42,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public static boolean showInventory = false;
 	
 	public static Thread thread;
-	public static int mapX = 1580;
-	public static int mapY = 1690;	
+	public static int mapX = 0;
+	public static int mapY = 0;	
 	// mapX = 1580;
 	// mapY = 1690;
 	public static BufferedImage[] screens = new BufferedImage[5];
@@ -78,22 +77,26 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	Audio sound = new Audio();
 	static boolean[] settingSongPlayed = new boolean[4];
 	
-	public static boolean fight = false;
-	public static int fightState = 0; // 1 --> fight or run? // 2 --> attack or snack? // 3 --> snacks
-	public static int appear = 0;
-	public static BufferedImage bossBackground;
+	public static boolean fight = false; // fighting or not
+	public static int fightState = 1; // 1 --> fight or run? // 2 --> attack or snack? // 3 --> snacks
+	public static int damage = 0;
+	public static int appear = 0; // initial animation
+	public static boolean turn = true; // initial turn will be player's -- false is boss'
 	public static int curPosX = 0;
 	public static int tempX = 400;
 	public static int tempY = 250;
-	public static BufferedImage[] fightImages = new BufferedImage[8];
-	
-	public static JPanel playerHealthPanel, bossHealthPanel;
-	public static JProgressBar playerHealthBar, bossHealthBar;
-	
+	public static BufferedImage[] fightImages = new BufferedImage[13];
+	public static int playerHealth = 125;
+	public static int bossHealth = 200;
+	public static String[] bossDialogue = new String[7];
+	public static int dialogue = 0;
+	public static BufferedImage[] damageText = new BufferedImage[10];
+	public static BufferedImage gameOver;
 	
 	static boolean[] healsVisited = new boolean[6];
 	static boolean[] doorsVisited = new boolean[10];  
 	HashMap<String, Integer> backpack = new HashMap<String, Integer>();
+	
 	public Main() {
 		setPreferredSize(new Dimension(windowWidth, windowHeight));
 		setBackground(new Color(200, 0, 0));
@@ -137,7 +140,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			inventoryFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/fonts/OMORI_GAME2.ttf")).deriveFont(30f);
 			blackspaceFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/fonts/OMORI_GAME.ttf")).deriveFont(50f);
 
-			fightImages[0] = ImageIO.read(new File("assets/boss/bossBackground.png"));
+			fightImages[0] = ImageIO.read(new File("assets/boss/bossDialogue.png"));
 			fightImages[1] = ImageIO.read(new File("assets/boss/fightorrun.png"));	
 			fightImages[2] = ImageIO.read(new File("assets/boss/fightselected.png"));	
 			fightImages[3] = ImageIO.read(new File("assets/boss/runSelected.png"));	
@@ -145,11 +148,31 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			fightImages[5] = ImageIO.read(new File("assets/boss/attackSelected.png"));	
 			fightImages[6] = ImageIO.read(new File("assets/boss/snackSelected.png"));	
 			fightImages[7] = ImageIO.read(new File("assets/boss/snackChoices.png"));	
+			fightImages[8] = ImageIO.read(new File("assets/boss/selectGreen.png"));
+			fightImages[9] = ImageIO.read(new File("assets/boss/selectBlue.png"));
+			fightImages[10] = ImageIO.read(new File("assets/boss/selectPicnic.png"));
+			fightImages[11] = ImageIO.read(new File("assets/boss/selectChicken.png"));
+			fightImages[12] = ImageIO.read(new File("assets/boss/selectBack.png"));
+			
+			bossDialogue[0] = "GWAHAHAHAHAHAHA!!!";
+			bossDialogue[1] = "Hmph... you need to do better.";
+			bossDialogue[2] = "I'll take you out!";
+			bossDialogue[3] = "Hmph... you lack training.";
+			bossDialogue[4] = "I won't go down so easily!";
+			bossDialogue[5] = "You got lucky...";
+			bossDialogue[6] = "You never had a chance!";
+			
+			gameOver = ImageIO.read(new File("assets/gameScreens/gameOver.png"));
+			
+			for(int i = 0; i < 10; i++) {
+				damageText[i] = ImageIO.read(new File("assets/boss/numbers/" + i + ".png"));
+			}
+			
 			for (int i = 1; i <= 5; i++) {
 				scareImages[i - 1] = ImageIO.read(new File("assets/scareImages/scare" + i + ".png"));	
 
 			}
-
+			
 			// script reading
 			for (int i = 1; i < 4; i++) {
 				mainScript[i] = new Interactable(new BufferedReader(new FileReader("assets/scripts/script" + i + ".txt")), false);
@@ -177,7 +200,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			backpack.put("Blue melon", 0);
 			backpack.put("Picnic", 0);
 			backpack.put("Chicken", 0);
-			
 
 
 
@@ -188,29 +210,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		} catch (FontFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
-		playerHealthPanel = new JPanel();
-		bossHealthPanel = new JPanel();
-		playerHealthBar = new JProgressBar(0, 125);
-		bossHealthBar = new JProgressBar(0, 200);
-		
-		playerHealthPanel.setBounds(250, 250, 100, 100);
-		playerHealthPanel.setBackground(Color.blue);
-		bossHealthPanel.setBounds(250,250, 300, 300);
-		bossHealthPanel.setBackground(Color.red);
-		
-		playerHealthBar.setPreferredSize(new Dimension(100, 100));
-		playerHealthBar.setValue(125);
-		bossHealthBar.setPreferredSize(new Dimension(300, 100));
-		bossHealthBar.setValue(200);
-		
-		playerHealthPanel.add(playerHealthBar);
-		bossHealthPanel.add(bossHealthBar);
-		
-
-		
-		
+		}		
 
 		interactables[1].add(new Rectangle(981, 1120, 40, 80)); // the pills
 		interactables[1].add(new Rectangle(1140, 1120, 60, 80)); // the book
@@ -243,6 +243,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		
 		bounds[2][0] = interactables[2];
 		
+		bounds[2][1].add(new Rectangle(0,0,5000,5000)); // for testing purposes
 		bounds[2][1].add(new Rectangle(876, 614, 52, 220));
 		bounds[2][1].add(new Rectangle(834, 810, 130, 150));
 		bounds[2][1].add(new Rectangle(784, 910, 416, 668));
@@ -325,6 +326,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		System.out.println("bop");
 		frame = new JFrame("OMORI");
 		panel = new Main();
+		panel.setLayout(new FlowLayout());
 //		panel.add(playerHealthBar);
 //		panel.add(bossHealthBar);
 		frame.add(panel);
@@ -341,20 +343,24 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		else g2d.setFont(speakingFont);
 		g2d.setColor(new Color(255, 255, 255));
 		
-
+		
+		
+		
 	
 		// play song
-		if (!settingSongPlayed[menuState]) {
-
-			try {
-				sound.playSettingMusic(menuState);
-			} catch (LineUnavailableException | IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			settingSongPlayed[menuState] = true;
-
-		} 
+		if(menuState != 4) {
+			if (!settingSongPlayed[menuState]) {
+	
+				try {
+					sound.playSettingMusic(menuState);
+				} catch (LineUnavailableException | IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				settingSongPlayed[menuState] = true;
+	
+			} 
+		}
 		
 		if (menuState == 0) {
 			if (submenuOption == 0) {
@@ -373,28 +379,76 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			}
 		}
 		else if (menuState > 0 && menuState < 4) {
+		
 			if(fight) {
+				if(playerHealth <= 0) {
+					playerHealth = 0;
+					fightState = 0;
+				
+				}
+				if(bossHealth <= 0) {
+					fightState = 0;
+					bossHealth = 0;
+					try {
+						screens[2] = ImageIO.read(new File("assets/gameScreens/omorimap2.png"));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					if(bounds[2][0].size() == 6) bounds[2][0].remove(5);
+				}
+				
 				
 				g2d.drawImage(fightImages[fightState], -100, 0, null);
-				panel.add(bossHealthBar);
-				panel.add(playerHealthBar);
-				
-				
-				frame.addKeyListener(this);
-				frame.addMouseListener(this);
-				frame.setFocusable(true);
-				frame.add(panel);
-				frame.pack();
-				frame.setVisible(true);
-				
-				
-				if(speaking) {
-					
+				try {
+					Font healthFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/fonts/OMORI_GAME2.ttf")).deriveFont(30f);
+					g2d.setFont(healthFont);
+					g2d.setColor(Color.black);
+					g2d.drawString(playerHealth + " / 125" , 95, 203);
+				} catch (FontFormatException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				else {
-					
+				
+				g2d.setFont(speakingFont);
+				g2d.setColor(Color.white);
+				
+				g2d.drawString(bossHealth + " / 200", 358, 90);
+				
+				
+				if(fightState >= 7) {
+					g2d.drawString("x " + backpack.get("Green melon"), 239, 500);
+					g2d.drawString("x " + backpack.get("Blue melon"), 400, 500);
+					g2d.drawString("x " + backpack.get("Picnic"), 561, 500);
+					g2d.drawString("x " + backpack.get("Chicken"), 715, 500);
 				}
+				
+				if(!turn) {
+					if(bossHealth == 0) dialogue = 5;
+					else if(playerHealth == 0) dialogue = 6;
+					
+					if(fightState == 0) g2d.drawString(bossDialogue[dialogue], 200, 420);
+					
+					if(damage > 0) {
+						String x = damage + "";
+						System.out.println("DAMAGE: " + x);
+						g2d.drawImage(damageText[Integer.parseInt(x.charAt(0) + "")], tempX, tempY, null);
+						g2d.drawImage(damageText[Integer.parseInt(x.charAt(1) + "")], tempX + 25, tempY, null);
+						
+						damage = 0;
+						
+						
+					}
+				}
+				
+				
 			}
+			else if(playerHealth <= 0) {
+				g2d.drawImage(gameOver, 0, 0, null);
+			}
+			
 			else {
 				try {
 					
@@ -407,7 +461,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					else {
 						g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
 					}
-	
 					
 					if(menuState == 2 && mapY >= 3498 && appear == 0) {
 						up = false;
@@ -423,6 +476,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					if (showScare) {
 						g2d.drawImage(scareImages[curScare], scareX, scareY, null);
 					}
+					
 					if (speaking) {
 						
 						Interactable cur = null;
@@ -455,16 +509,23 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 								speaking = true;
 							}
 							else if (menuState == 2 && choice && scriptRead[menuState]) {
-								try {
-									sound.playSoundEffect(10);
-									String curItem = interactablesScript[menuState].get(interactableScript).getName();
-									backpack.put(curItem, backpack.get(curItem) + 1);
-									healsVisited[interactableScript] = true;
-									System.out.println("bagged");
-								} catch (LineUnavailableException | IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+								if(interactableScript == 5) {
+									fight = true;
+									System.out.println("start fight");
 								}
+								else {
+									try {
+										sound.playSoundEffect(10);
+										String curItem = interactablesScript[menuState].get(interactableScript).getName();
+										backpack.put(curItem, backpack.get(curItem) + 1);
+										healsVisited[interactableScript] = true;
+										System.out.println("bagged");
+									} catch (LineUnavailableException | IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}
+								
 							}
 							else {
 								scriptRead[menuState] = true;
@@ -477,7 +538,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 							g2d.drawString(curSlides.get(speakingInd)[0], 25, 480);
 							g2d.drawString(curSlides.get(speakingInd)[1], 25, 520);
 							g2d.drawString(curSlides.get(speakingInd)[2], 25, 560);			
-							System.out.println(choosing);
+//							System.out.println(choosing);
 							if (speakingInd == cur.getSlidesSize() - 1 && choosing) {			
 								System.out.println("wagnan");
 								g2d.drawImage(selector, (choice) ? 200: 525, 540, null);
@@ -529,10 +590,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			}
 			else if (menuState > 0) {
 				if(appear == 1) {
-					// go to x = 2558, then y = 3970
-//					int curPosX = 2558 - mapX;
-					// pos value means move to right, negative value means move to left
-					
 					
 					for(int i = 0; i < (int)Math.abs(curPosX); i++) {
 //						System.out.println("CHANGE: " + mapX + " " + mapY + " PLAYER: " + tempX + " " + tempY);
@@ -652,6 +709,59 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					
 					// map
 					if(menuState == 2) {
+						// if player or boss die, delay
+						if(fight && (bossHealth <= 0 || playerHealth <= 0)) {
+							try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							fight = false;
+	
+						}
+						if(fight == false && (bossHealth <= 0 || playerHealth <= 0)) {
+							repaint();
+						}
+						if(!turn && bossHealth > 0) {
+							
+							try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
+							fightState = 0;
+							
+							// boss' attack
+							damage = (int) (Math.random() * (30 - 15 + 1) + 15);
+							playerHealth -= damage;
+							// 15 - 30 damage - max - min
+							
+							// for user getting hit .. 220,150 + 225, 150
+							tempX = 220;
+							tempY = 150;
+							
+							
+							repaint();
+							
+							try {
+								Thread.sleep(800);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							// set turn back to user and change screen to fight/run
+							turn = true;
+							fightState = 1;
+							
+							// change dialogue for next occurence
+							dialogue++;
+							if(dialogue >= 5) dialogue = 0;
+							repaint();
+							
+						}
 						// teleport thing 1
 						if(within(entrances[2].get(0), new Point(mapX, mapY))) {
 							System.out.println("in gate");
@@ -687,6 +797,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						}
 					}
 					
+					
+					
 					// black space
 					if (menuState == 3) {
 						if (mapY < 1000) {
@@ -708,6 +820,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 
 		}
 	}
+	
 
 	public boolean within(Rectangle r, Point p) {
 		if (p == null) return false;
@@ -767,6 +880,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						System.out.println("clicked");
 						mapX = 2554; // 1050
 						mapY = 3424; // 1200
+						fight = true;
 						sound.playSoundEffect(7);
 					}
 					// options
@@ -834,12 +948,13 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public void keyPressed(KeyEvent e) {
 		int key = e.getKeyCode();
 
-		if(fight) {
+		if(fight && turn && damage == 0) {
+			// user can select between fighting or running
 			if(fightState < 4) {
-				if(key == 38 && !speaking) {
+				if(key == 38) {
 					fightState = 2; // fight selected
 				}
-				else if(key == 40 && !speaking) {
+				else if(key == 40) {
 					fightState = 3; // run selected
 				}
 
@@ -849,24 +964,102 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					}
 					else if(fightState == 3) { // user chooses to run
 						fight = false;
-						fightState = 0;
+						fightState = 1;
 					}
 				}
 			}
+			// user can choose between attacking and snacking / gain hp
 			else if(fightState >= 4 && fightState <= 6) {
-				if(key == 37 && !speaking) {
+				if(key == 37) {
 					fightState = 5; // atack selected
 				}
-				else if(key == 39 && !speaking) {
+				else if(key == 39) {
 					fightState = 6; // snack selected
 				}
 				
 				if(key == 88) {
 					if(fightState == 5) {
 						// run attack method or soething
+						damage = (int) (Math.random() * (100 - 100 + 1) + 100);
+						bossHealth -= damage;
+						// 20 - 40 damage // max - min + 1 + min
+						
+						turn = false;
+						tempX = 600;
+						tempY = 100;
+						
+						
+						
 					}
 					else if(fightState == 6) {
 						fightState = 7; // open snack menu
+						
+					}
+				}
+			}
+			// user can select which snack to eat
+			else if(fightState >= 7) {
+				if(fightState == 7 && (key == 40 || key == 39)) {
+					fightState = 8; // green melon
+				}
+				else if(fightState == 12) {
+					if(key == 40) { // go bck down to melon
+						fightState = 8;
+					}
+					else if(key == 88) { // select back
+						System.out.println("back");
+						fightState = 4;
+					}
+				}
+				
+				else if(fightState >= 8) {
+					if(key == 37) { // choices move to the left
+						fightState--;
+						if(fightState <= 7) fightState = 8;
+					}
+					else if(key == 39) { // choices move to the right
+						fightState++;
+						if(fightState > 11) fightState = 11;
+					}
+					else if(key == 38) {
+						fightState = 12;
+						System.out.println("back");
+					}
+					else if(key == 88) {
+						boolean valid = false;
+						if(fightState == 8) { // select green melon
+							System.out.println("green");
+							if(backpack.get("Green melon") > 0) {
+								playerHealth += 10;
+								valid = true;
+							}
+						}
+						else if(fightState == 9) { // select blue melon
+							System.out.println("blue");
+							if(backpack.get("Blue melon") > 0) {
+								playerHealth += 15;
+								valid = true;
+							}
+						}
+						else if(fightState == 10) { // select picnic
+							System.out.println("picnic");
+							if(backpack.get("Picnic") > 0) {
+								playerHealth += 20;
+								valid = true;
+							}
+						}
+						else if(fightState == 11) { // select chicken
+							System.out.println("chicken");
+							if(backpack.get("Chicken") > 0) {
+								playerHealth += 30;
+								valid = true;
+							}
+						}
+						if(valid) {
+							turn = false;
+							fightState = 0;
+						}
+						
 					}
 				}
 			}
@@ -989,7 +1182,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				scareX = windowWidth / 2 - scareImages[n].getWidth() / 2;
 				scareY = windowHeight + scareImages[n].getHeight();
 			}
-			
 		} catch (LineUnavailableException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
