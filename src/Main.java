@@ -13,6 +13,10 @@ import java.util.*;
 
 public class Main extends JPanel implements KeyListener, MouseListener, Runnable{
 
+	public static JFrame frame;
+	public static Container con;
+	public static Main panel;
+	
 	boolean up, down, left, right; // movement in a direction
 	ArrayList<Image> playerImages = new ArrayList<>(); // arraylist of player images
 	int playerIndex = 1; // which image to display of player
@@ -64,6 +68,18 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	Audio sound = new Audio();
 	static boolean[] settingSongPlayed = new boolean[4];
 	
+	public static boolean fight = false;
+	public static int fightState = 0; // 1 --> fight or run? // 2 --> attack or snack? // 3 --> snacks
+	public static int appear = 0;
+	public static BufferedImage bossBackground;
+	public static int curPosX = 0;
+	public static int tempX = 400;
+	public static int tempY = 250;
+	public static BufferedImage[] fightImages = new BufferedImage[8];
+	
+	public static JPanel playerHealthPanel, bossHealthPanel;
+	public static JProgressBar playerHealthBar, bossHealthBar;
+	
 	
 	static boolean[] healsVisited = new boolean[6];
 	HashMap<String, Integer> backpack = new HashMap<String, Integer>();
@@ -97,7 +113,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			inventoryMenu = ImageIO.read(new File("assets/gameScreens/inventoryMenu.png"));
 			screens[0] = ImageIO.read(new File("assets/gameScreens/titleScreen.png"));
 			screens[1] = ImageIO.read(new File("assets/gameScreens/whitespace2.png"));
-			screens[2] = ImageIO.read(new File("assets/gameScreens/omorimap2.png"));
+			screens[2] = ImageIO.read(new File("assets/gameScreens/mapwithboss.png"));
+//			screens[2] = ImageIO.read(new File("assets/gameScreens/omorimap2.png")); -- replace after boss is defeated
 			screens[3] = ImageIO.read(new File("assets/gameScreens/blackspace.png"));
 			speechBoxes[0] = ImageIO.read(new File("assets/scripts/speechBox.png"));
 			speechBoxes[1] = ImageIO.read(new File("assets/scripts/sunny.png"));
@@ -106,7 +123,14 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			selector = ImageIO.read(new File("assets/scripts/select.png"));
 			speakingFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/fonts/OMORI_GAME2.ttf")).deriveFont(50f);
 			inventoryFont = Font.createFont(Font.TRUETYPE_FONT, new File("assets/fonts/OMORI_GAME2.ttf")).deriveFont(30f);
-
+			fightImages[0] = ImageIO.read(new File("assets/boss/bossBackground.png"));
+			fightImages[1] = ImageIO.read(new File("assets/boss/fightorrun.png"));	
+			fightImages[2] = ImageIO.read(new File("assets/boss/fightselected.png"));	
+			fightImages[3] = ImageIO.read(new File("assets/boss/runSelected.png"));	
+			fightImages[4] = ImageIO.read(new File("assets/boss/attackorsnack.png"));	
+			fightImages[5] = ImageIO.read(new File("assets/boss/attackSelected.png"));	
+			fightImages[6] = ImageIO.read(new File("assets/boss/snackSelected.png"));	
+			fightImages[7] = ImageIO.read(new File("assets/boss/snackChoices.png"));	
 			
 			// script reading
 			for (int i = 1; i < 4; i++) {
@@ -121,6 +145,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			interactablesScript[2].add(new Interactable("Grab an apple out of the picnic box?", true, "Picnic", 30));
 			interactablesScript[2].add(new Interactable("Grab a slice of chicken?", true, "Chicken", 30));
 			interactablesScript[2].add(new Interactable("Grab a piece of blue melon?", true, "Blue melon", 15));
+			interactablesScript[2].add(new Interactable("You encounter a strange, unidentifiable... creature? Fight?", true, "boss", 0));
 			
 			
 			backpack.put("Green melon", 0);
@@ -139,6 +164,26 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			e.printStackTrace();
 		}
 		
+		playerHealthPanel = new JPanel();
+		bossHealthPanel = new JPanel();
+		playerHealthBar = new JProgressBar(0, 125);
+		bossHealthBar = new JProgressBar(0, 200);
+		
+		playerHealthPanel.setBounds(250, 250, 100, 100);
+		playerHealthPanel.setBackground(Color.blue);
+		bossHealthPanel.setBounds(250,250, 300, 300);
+		bossHealthPanel.setBackground(Color.red);
+		
+		playerHealthBar.setPreferredSize(new Dimension(100, 100));
+		playerHealthBar.setValue(125);
+		bossHealthBar.setPreferredSize(new Dimension(300, 100));
+		bossHealthBar.setValue(200);
+		
+		playerHealthPanel.add(playerHealthBar);
+		bossHealthPanel.add(bossHealthBar);
+		
+
+		
 		
 
 		interactables[1].add(new Rectangle(981, 1120, 40, 80)); // the pills
@@ -149,6 +194,13 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		interactables[3].add(new Rectangle(1686, 1716, 60, 80)); // the book
 		interactables[3].add(new Rectangle(1450, 1782, 90, 70)); // the cat
 		
+		interactables[2].add(new Rectangle(1156, 860, 60, 52));
+		interactables[2].add(new Rectangle(650, 1696, 72, 44));
+		interactables[2].add(new Rectangle(2810, 2150, 72, 72));
+		interactables[2].add(new Rectangle(2916, 2268, 74, 68));
+		interactables[2].add(new Rectangle(3722, 2604, 68, 68));
+		interactables[2].add(new Rectangle(2490, 3946, 150, 10));
+		
 		// doors, starting from one on the left. clockwise fashion
 		interactables[3].add(new Rectangle(1248, 1624, 82, 80));
 		interactables[3].add(new Rectangle(1444, 1432, 82, 80));
@@ -156,19 +208,12 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		interactables[3].add(new Rectangle(1854, 1748, 82, 80));
 		interactables[3].add(new Rectangle(1654, 1926, 82, 80));
 		interactables[3].add(new Rectangle(1400, 1890, 82, 80));
-
-
 		
 		bounds[1][0] = interactables[1];
 		bounds[1][1].add(new Rectangle(0, 0, 3000, 3000));
 		
 		// map bounds
 		
-		interactables[2].add(new Rectangle(1156, 860, 60, 52));
-		interactables[2].add(new Rectangle(650, 1696, 72, 44));
-		interactables[2].add(new Rectangle(2810, 2150, 72, 72));
-		interactables[2].add(new Rectangle(2916, 2268, 74, 68));
-		interactables[2].add(new Rectangle(3722, 2604, 68, 68));
 		bounds[2][0] = interactables[2];
 		
 		bounds[2][1].add(new Rectangle(876, 614, 52, 220));
@@ -251,8 +296,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	
 	public static void main(String[] args) {
 		System.out.println("bop");
-		JFrame frame = new JFrame("OMORI");
-		Main panel = new Main();
+		frame = new JFrame("OMORI");
+		panel = new Main();
+//		panel.add(playerHealthBar);
+//		panel.add(bossHealthBar);
 		frame.add(panel);
 		frame.pack();
 		frame.setVisible(true);
@@ -266,6 +313,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		g2d.setFont(speakingFont);
 		g2d.setColor(new Color(255, 255, 255));
 		
+
+	
 		// play song
 		if (!settingSongPlayed[menuState]) {
 
@@ -296,87 +345,137 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			}
 		}
 		else if (menuState > 0) {
-			try {
+			if(fight) {
 				
-				Thread.sleep(10);
-				g2d.drawImage(screens[menuState], -1 * mapX, -1 * mapY, null);
-				g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
-				if (speaking) {
+				g2d.drawImage(fightImages[fightState], -100, 0, null);
+				panel.add(bossHealthBar);
+				panel.add(playerHealthBar);
+				
+				
+				frame.addKeyListener(this);
+				frame.addMouseListener(this);
+				frame.setFocusable(true);
+				frame.add(panel);
+				frame.pack();
+				frame.setVisible(true);
+				
+				
+				if(speaking) {
 					
-					Interactable cur = null;
-					ArrayList<String[]> curSlides = null; 
-					up = false;
-					down = false;
-					right = false;
-					left = false;
-					if (!scriptRead[menuState]) {
-						g2d.drawImage(speechBoxes[menuState], 0, 260, null);
-						cur = mainScript[menuState];
-						curSlides = cur.getSlides();
+				}
+				else {
+					
+				}
+			}
+			else {
+				try {
+					
+					Thread.sleep(10);
+					g2d.drawImage(screens[menuState], -1 * mapX, -1 * mapY, null);
+					
+					if(appear == 1) {
+						System.out.println("CHANGE: " + mapX + " " + mapY + " PLAYER: " + tempX + " " + tempY);
+						g2d.drawImage(playerImages.get(playerIndex), tempX, tempY, null);
 					}
 					else {
-						g2d.drawImage(speechBoxes[0], 0, 434, null);
-						cur = interactablesScript[menuState].get(interactableScript);
-						curSlides = cur.getSlides();
+						g2d.drawImage(playerImages.get(playerIndex), playerX, playerY, null);
 					}
-					if (speakingInd == cur.getSlidesSize()) {
-						choosing = false;
-						speakingInd = 0;
-						speaking = false;
-
-						if (menuState == 1 && interactableScript == 0 && choice) {
-							menuState = 2;
-							System.out.println("new world");
-							mapX = 902;
-							mapY = 644;
-							playerIndex = 1;
-							speaking = true;
-						}
-						else if (menuState == 2 && choice && scriptRead[menuState]) {
-							try {
-								sound.playSoundEffect(2);
-								String curItem = interactablesScript[menuState].get(interactableScript).getName();
-								backpack.put(curItem, backpack.get(curItem) + 1);
-								healsVisited[interactableScript] = true;
-								System.out.println("bagged");
-							} catch (LineUnavailableException | IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
+					
+					if(menuState == 2 && mapY >= 3498 && appear == 0) {
+						up = false;
+						down = false;
+						left = false;
+						right = false;
+						
+						appear = 1;
+						curPosX = 2558 - mapX;
+						System.out.println("boss appear: X: " + curPosX);
+	
+					}
+					
+					if (speaking) {
+						
+						Interactable cur = null;
+						ArrayList<String[]> curSlides = null; 
+						up = false;
+						down = false;
+						right = false;
+						left = false;
+						if (!scriptRead[menuState]) {
+							g2d.drawImage(speechBoxes[menuState], 0, 260, null);
+							cur = mainScript[menuState];
+							curSlides = cur.getSlides();
 						}
 						else {
-							scriptRead[menuState] = true;
-							choice = true;
+							g2d.drawImage(speechBoxes[0], 0, 434, null);
+							cur = interactablesScript[menuState].get(interactableScript);
+							curSlides = cur.getSlides();
 						}
-						
-
-					}
-					else {
-						g2d.drawString(curSlides.get(speakingInd)[0], 25, 480);
-						g2d.drawString(curSlides.get(speakingInd)[1], 25, 520);
-						g2d.drawString(curSlides.get(speakingInd)[2], 25, 560);			
-						System.out.println(choosing);
-						if (speakingInd == cur.getSlidesSize() - 1 && choosing) {			
-							System.out.println("wagnan");
-							int posx = (choice) ? 200: 525;
-							g2d.drawImage(selector, posx, 540, null);
-						
+						if (speakingInd == cur.getSlidesSize()) {
+							choosing = false;
+							speakingInd = 0;
+							speaking = false;
+	
+							if (menuState == 1 && interactableScript == 0 && choice) {
+								menuState = 2;
+								System.out.println("new world");
+								mapX = 902;
+								mapY = 644;
+								playerIndex = 1;
+								speaking = true;
+							}
+							
+							if(menuState == 2 && interactableScript == 5 && choice) {
+								System.out.println("start fight");
+								fight = true;
+								
+							}
+							else if (menuState == 2 && choice && scriptRead[menuState]) {
+								try {
+									sound.playSoundEffect(2);
+									String curItem = interactablesScript[menuState].get(interactableScript).getName();
+									backpack.put(curItem, backpack.get(curItem) + 1);
+									healsVisited[interactableScript] = true;
+									System.out.println("bagged");
+								} catch (LineUnavailableException | IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+							else {
+								scriptRead[menuState] = true;
+								choice = true;
+							}
+							
+	
+						}
+						else {
+							g2d.drawString(curSlides.get(speakingInd)[0], 25, 480);
+							g2d.drawString(curSlides.get(speakingInd)[1], 25, 520);
+							g2d.drawString(curSlides.get(speakingInd)[2], 25, 560);			
+							System.out.println(choosing);
+							if (speakingInd == cur.getSlidesSize() - 1 && choosing) {			
+								System.out.println("wagnan");
+								int posx = (choice) ? 200: 525;
+								g2d.drawImage(selector, posx, 540, null);
+							
+							}
 						}
 					}
+					else if (showInventory) {
+						g2d.setFont(inventoryFont);
+						g2d.drawImage(inventoryMenu, 0, 349, null);
+						g2d.drawString("x " + backpack.get("Green melon"), 239, 505);
+						g2d.drawString("x " + backpack.get("Blue melon"), 400, 505);
+						g2d.drawString("x " + backpack.get("Picnic"), 561, 505);
+						g2d.drawString("x " + backpack.get("Chicken"), 715, 505);
+	
+					}
+	
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				else if (showInventory) {
-					g2d.setFont(inventoryFont);
-					g2d.drawImage(inventoryMenu, 0, 349, null);
-					g2d.drawString("x " + backpack.get("Green melon"), 239, 505);
-					g2d.drawString("x " + backpack.get("Blue melon"), 400, 505);
-					g2d.drawString("x " + backpack.get("Picnic"), 561, 505);
-					g2d.drawString("x " + backpack.get("Chicken"), 715, 505);
-
-				}
-
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 
@@ -384,6 +483,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 
 	public void run() {
 		while(true) {
+			
 			try {
 				Thread.sleep(17);
 			} catch (InterruptedException e) {
@@ -403,116 +503,170 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				repaint();
 			}
 			else if (menuState > 0) {
-				if(up && withinBounds(bounds[menuState], new Point(posX, posY - charSpeed))) {
-					Player.key = 1;
-					// playerY -= 10;
-					mapY -= charSpeed;
-					Player.run();
-					System.out.println(mapX + " " + mapY);
-					yCounter = (yCounter - 1) % 1000;
-
-
-				}
-				if(down && withinBounds(bounds[menuState], new Point(posX, posY + charSpeed))) {
-					Player.key = 3;
-					// playerY += 10;
-					mapY += charSpeed;
-					Player.run();
-					System.out.println(mapX + " " + mapY);
-					yCounter = (yCounter + 1) % 1000;
-
-
-				}
-				if(left && withinBounds(bounds[menuState], new Point(posX - charSpeed, posY))) {
-					Player.key = 2;
-					// playerX -= 10;
-					mapX -= charSpeed;
-					Player.run();
-					System.out.println(mapX + " " + mapY);
-					xCounter = (xCounter - 1) % 1000;
-
-				}
-				if(right && withinBounds(bounds[menuState], new Point(posX + charSpeed, posY))) {
-					Player.key = 4;
-					// playerX += 10;
-					mapX += charSpeed;
-					Player.run();
-					System.out.println(mapX + " " + mapY);
-					xCounter = (xCounter + 1) % 1000;
-
-				}
-				
-				// if they have left 1 quadrant of the whitespace
-				if (menuState == 1) {
-					if (mapY < 800) {
-						mapY = 1600;
+				if(appear == 1) {
+					// go to x = 2558, then y = 3970
+//					int curPosX = 2558 - mapX;
+					// pos value means move to right, negative value means move to left
+					
+					
+					for(int i = 0; i < (int)Math.abs(curPosX); i++) {
+//						System.out.println("CHANGE: " + mapX + " " + mapY + " PLAYER: " + tempX + " " + tempY);
+						if(curPosX > 0) {
+							mapX += 1; 
+							tempX -= 1;
+							System.out.println("pos");
+						}
+						else if(curPosX < 0) {
+							mapX -= 1; 
+							tempX += 1; System.out.println("negative");
+						}
+						try {Thread.sleep(20);} 
+						catch (InterruptedException e) {e.printStackTrace();}		
+						repaint();
 					}
-					if (mapY > 1600) {
-						mapY = 800;
+					
+					for(int i = 0; i < 59; i ++) {
+						mapY += 10;
+						tempY -= 10;
+						try {Thread.sleep(20);} 
+						catch (InterruptedException e) {e.printStackTrace();}
+						repaint();
 					}
-					if (mapX < 450) {
-						mapX = 1650;
+					
+					try {
+						Thread.sleep(500);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-					if (mapX > 1650) {
-						mapX = 450;
+					
+					if(curPosX > 0) {
+						mapX -= (int)Math.abs(curPosX);
+						mapY -= 590;
+					}
+					else {
+						mapX += (int)Math.abs(curPosX); 
+						mapY -= 590;
+					}
+					
+					repaint();
+					
+					appear = 2;
+//					System.out.println(mapX);
+				}
+				else {
+					if(up && withinBounds(bounds[menuState], new Point(posX, posY - charSpeed))) {
+						Player.key = 1;
+						// playerY -= 10;
+						mapY -= charSpeed;
+						Player.run();
+						System.out.println(mapX + " " + mapY);
+						yCounter = (yCounter - 1) % 1000;
+	
+	
+					}
+					if(down && withinBounds(bounds[menuState], new Point(posX, posY + charSpeed))) {
+						Player.key = 3;
+						// playerY += 10;
+						mapY += charSpeed;
+						Player.run();
+						System.out.println(mapX + " " + mapY);
+						yCounter = (yCounter + 1) % 1000;
+	
+	
+					}
+					if(left && withinBounds(bounds[menuState], new Point(posX - charSpeed, posY))) {
+						Player.key = 2;
+						// playerX -= 10;
+						mapX -= charSpeed;
+						Player.run();
+						System.out.println(mapX + " " + mapY);
+						xCounter = (xCounter - 1) % 1000;
+	
+					}
+					if(right && withinBounds(bounds[menuState], new Point(posX + charSpeed, posY))) {
+						Player.key = 4;
+						// playerX += 10;
+						mapX += charSpeed;
+						Player.run();
+						System.out.println(mapX + " " + mapY);
+						xCounter = (xCounter + 1) % 1000;
+	
+					}
+					
+					// if they have left 1 quadrant of the whitespace
+					if (menuState == 1) {
+						if (mapY < 800) {
+							mapY = 1600;
+						}
+						if (mapY > 1600) {
+							mapY = 800;
+						}
+						if (mapX < 450) {
+							mapX = 1650;
+						}
+						if (mapX > 1650) {
+							mapX = 450;
+						}
+						
+					}
+					
+					// map
+					if(menuState == 2) {
+						// teleport thing 1
+						if(within(entrances[2].get(0), new Point(mapX, mapY))) {
+							System.out.println("in gate");
+							up = false;
+							down = false;
+							right = false;
+							left = false;
+							mapX = 2816;
+							mapY = 2128;
+							
+						}
+						// teleport thing 2
+						else if(within(entrances[2].get(1), new Point(mapX, mapY))) {
+							System.out.println("in other gate 2");
+							up = false;
+							down = false;
+							right = false;
+							left = false;
+							mapX = 1560;
+							mapY = 984;
+							
+						}
+						else if(within(entrances[2].get(2), new Point(mapX, mapY))) {
+							System.out.println("exit map into black space");
+							
+							up = false;
+							down = false;
+							right = false;
+							left = false;
+							mapX = 1580;
+							mapY = 1690;
+							menuState = 3;
+						}
+					}
+					
+					// black space
+					if (menuState == 3) {
+						if (mapY < 1000) {
+							mapY = 2394;
+						}
+						if (mapY > 2394) {
+							mapY = 1000;
+						}
+						if (mapX < 700) {
+							mapX = 2700;
+						}
+						if (mapX > 2700) {
+							mapX = 700;
+						}
 					}
 					
 				}
-				
-				// map
-				if(menuState == 2) {
-					// teleport thing 1
-					if(within(entrances[2].get(0), new Point(mapX, mapY))) {
-						System.out.println("in gate");
-						up = false;
-						down = false;
-						right = false;
-						left = false;
-						mapX = 2816;
-						mapY = 2128;
-						
-					}
-					// teleport thing 2
-					else if(within(entrances[2].get(1), new Point(mapX, mapY))) {
-						System.out.println("in other gate 2");
-						up = false;
-						down = false;
-						right = false;
-						left = false;
-						mapX = 1560;
-						mapY = 984;
-						
-					}
-					else if(within(entrances[2].get(2), new Point(mapX, mapY))) {
-						System.out.println("exit map into black space");
-						
-						up = false;
-						down = false;
-						right = false;
-						left = false;
-						mapX = 1580;
-						mapY = 1690;
-						menuState = 3;
-					}
-				}
-				
-				// black space
-				if (menuState == 3) {
-					if (mapY < 1000) {
-						mapY = 2394;
-					}
-					if (mapY > 2394) {
-						mapY = 1000;
-					}
-					if (mapX < 700) {
-						mapX = 2700;
-					}
-					if (mapX > 2700) {
-						mapX = 700;
-					}
-				}
-				
 			}
+
 		}
 	}
 
@@ -570,10 +724,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					
 					// play game
 					if (within(new Rectangle(142, 545, 169, 40), getMousePosition())) {
-						menuState = 1;
+						menuState = 2; // 1
 						System.out.println("clicked");
-						mapX = 1050;
-						mapY = 1200;
+						mapX = 2554; // 1050
+						mapY = 3424; // 1200
 						sound.playSoundEffect(4);
 					}
 					// options
@@ -641,7 +795,46 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public void keyPressed(KeyEvent e) {
 		int key = e.getKeyCode();
 
-		if (menuState > 0) {
+		if(fight) {
+			if(fightState < 4) {
+				if(key == 38 && !speaking) {
+					fightState = 2; // fight selected
+				}
+				else if(key == 40 && !speaking) {
+					fightState = 3; // run selected
+				}
+
+				if(key == 88) {
+					if(fightState == 2) { // user chooses to fight
+						fightState = 4; 
+					}
+					else if(fightState == 3) { // user chooses to run
+						fight = false;
+						fightState = 0;
+					}
+				}
+			}
+			else if(fightState >= 4 && fightState <= 6) {
+				if(key == 37 && !speaking) {
+					fightState = 5; // atack selected
+				}
+				else if(key == 39 && !speaking) {
+					fightState = 6; // snack selected
+				}
+				
+				if(key == 88) {
+					if(fightState == 5) {
+						// run attack method or soething
+					}
+					else if(fightState == 6) {
+						fightState = 7; // open snack menu
+					}
+				}
+			}
+			
+		}
+		
+		else if (menuState > 0 && appear != 1) {
 			// w
 			if(key == 38 && !speaking) {
 				up = true;
