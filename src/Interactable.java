@@ -1,3 +1,6 @@
+/*
+ * This is an object class for the main game that stores information on interactable objects.
+ */
 import java.util.*;
 import java.io.*;
 public class Interactable {
@@ -9,6 +12,8 @@ public class Interactable {
 	
 	
 	public Interactable(BufferedReader file, boolean option) {
+		
+		// read the script for an interactable object
 		try {
 			this.choice = option;
 			String s;
@@ -55,6 +60,8 @@ public class Interactable {
 		this.choice = option;
 		this.name = name;
 		this.health = health;
+		
+		// read the script for an interactable object
 		StringBuilder line = new StringBuilder("");
 		String[] slide = new String[] {"", "", ""};
 		int ind = 0;
@@ -81,6 +88,7 @@ public class Interactable {
 			}
 		}
 		slide[lineInd] = line.toString();
+		// if option is true, it means that this script is giving the user an option to pick yes or no
 		if (option) {
 			slide[2] = "                  YES                  NO";
 		}

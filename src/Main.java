@@ -1,4 +1,20 @@
-
+/*
+ * ISU4U - CULMINATING PROJECT
+ * June 18 2023
+ * -- OMORI
+ * 
+ * Created by Orion Chen and Nicky Lam.
+ * 
+ * This game is an experience of a depressive episode. 
+ * This game is a 2D adventure game where you must explore your surroundings to proceed in the story line.
+ * You will be controlling a character who is named SUNNY located in WHITESPACE and need to find a way to start the game. 
+ * Once you begin the game, you are now a delusion of SUNNY named OMORI. 
+ * 
+ * Nicky pulled an all nighter to finish battle.
+ * 
+ * 
+ * 
+ */
 import javax.swing.*;
 import javax.swing.Timer;
 
@@ -21,12 +37,22 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public static Container con;
 	public static Main panel;
 	
+	// player variables
 	boolean up, down, left, right; // movement in a direction
 	ArrayList<Image> playerImages = new ArrayList<>(); // arraylist of player images
+	public static Thread thread;
+	public static int mapX = 0;
+	public static int mapY = 0;	
 	int playerIndex = 1; // which image to display of player
 	int playerX = 400, playerY = 250;
 	int xCounter = 0;
 	int yCounter = 0;  // mod 100 
+	static int charHeight = 66;
+	static int charWidth = 63;
+	static int charSpeed = 2;
+	
+	
+	// for the scare animation
 	static int scareX = 0;
 	static int scareY = 0;
 	static boolean showScare = false;
@@ -35,6 +61,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	static int curScare;
 	public static BufferedImage[] scareImages = new BufferedImage[5];
 	
+	
+	// menu variables
 	Player Player = new Player(this);
 	public static int menuState = 0;
 	public static BufferedImage title2;
@@ -45,42 +73,38 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public static BufferedImage inventoryMenu;
 	public static boolean showInventory = false;
 	
-	public static Thread thread;
-	public static int mapX = 0;
-	public static int mapY = 0;	
-	// mapX = 1580;
-	// mapY = 1690;
+	// images
 	public static BufferedImage[] screens = new BufferedImage[5];
-	public static BufferedImage[] speechBoxes = new BufferedImage[4];
+	public static BufferedImage[] speechBoxes = new BufferedImage[5];
 	public static int mouseX;
 	public static int mouseY;
 	public static int windowWidth = 900;
 	public static int windowHeight = 600;
 	
-	static boolean speaking = true;
+	// script reading
+	static boolean speaking;
 	static int speakingInd = 0;
-	static boolean[] scriptRead = new boolean[4];
-	static Interactable[] mainScript = new Interactable[4];
+	static boolean[] scriptRead = new boolean[5];
+	static Interactable[] mainScript = new Interactable[5];
 	static BufferedImage selector;
-	static ArrayList<Interactable>[] interactablesScript = new ArrayList[4];
+	static ArrayList<Interactable>[] interactablesScript = new ArrayList[5];
 	static int interactableScript = -1;
 	static boolean choosing = false;
 	static boolean choice = true;
 	
-	static int charHeight = 66;
-	static int charWidth = 63;
-	static int charSpeed = 2;
-	public static ArrayList<Rectangle>[] interactables = new ArrayList[4];
-	public static ArrayList<Rectangle>[][] bounds = new ArrayList[4][2];
-	public static ArrayList<Rectangle>[] entrances = new ArrayList[4];
+	// map boundaries / interacts
+	public static ArrayList<Rectangle>[] interactables = new ArrayList[5];
+	public static ArrayList<Rectangle>[][] bounds = new ArrayList[5][2];
+	public static ArrayList<Rectangle>[] entrances = new ArrayList[5];
 	
 	static Font speakingFont;
 	static Font blackspaceFont;
 	static Font inventoryFont;
 	
 	Audio sound = new Audio();
-	static boolean[] settingSongPlayed = new boolean[4];
+	static boolean[] settingSongPlayed = new boolean[5];
 	
+	// battle variables
 	public static boolean fight = false; // fighting or not
 	public static int fightState = 1; // 1 --> fight or run? // 2 --> attack or snack? // 3 --> snacks
 	public static int damage = 0;
@@ -111,16 +135,16 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		addMouseListener(this);
 		this.setFocusable(true);
 		
+		// all imports
 		try {
 			for(int i = 0; i < 12; i++) {
 				Image image = ImageIO.read(new File("assets/runAnimation/" + (i+1) + ".png"));
 				Image newImage = image.getScaledInstance(charWidth, charHeight,  java.awt.Image.SCALE_SMOOTH);
 				image = newImage;
-				
 				playerImages.add(image);
 			}
 
-			for (int i = 0; i < 4; i++) {
+			for (int i = 0; i < 5; i++) {
 				interactables[i] = new ArrayList<Rectangle>();
 				interactablesScript[i] = new ArrayList<Interactable>();
 				entrances[i] = new ArrayList<Rectangle>();
@@ -135,7 +159,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			screens[0] = ImageIO.read(new File("assets/gameScreens/titleScreen.png"));
 			screens[1] = ImageIO.read(new File("assets/gameScreens/whitespace2.png"));
 			screens[2] = ImageIO.read(new File("assets/gameScreens/mapwithboss.png"));
-//			screens[2] = ImageIO.read(new File("assets/gameScreens/omorimap2.png")); -- replace after boss is defeated
 			screens[3] = ImageIO.read(new File("assets/gameScreens/blackspace.png"));
 			screens[4] = ImageIO.read(new File("assets/gameScreens/winScreen.png"));
 			speechBoxes[0] = ImageIO.read(new File("assets/scripts/speechBox.png"));
@@ -198,11 +221,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			interactablesScript[1].add(new Interactable(new BufferedReader(new FileReader("assets/scripts/journal.txt")), false));
 			interactablesScript[1].get(1).getSlides().add(0, new String[] {"SUNNY'S JOURNAL", "", ""});
 			interactablesScript[1].add(new Interactable("meow.", false, "cat", 0));
-			interactablesScript[2].add(new Interactable("Grab a piece of green melon?", true, "Green melon", 10));
-			interactablesScript[2].add(new Interactable("Grab a piece of green melon?", true, "Green melon", 10));
-			interactablesScript[2].add(new Interactable("Grab the picnic basket?", true, "Picnic", 30));
-			interactablesScript[2].add(new Interactable("Grab a slice of chicken?", true, "Chicken", 30));
-			interactablesScript[2].add(new Interactable("Grab a piece of blue melon?", true, "Blue melon", 15));
+			interactablesScript[2].add(new Interactable("Grab a piece of green melon? By the way, toggle C to view inventory!", true, "Green melon", 20));
+			interactablesScript[2].add(new Interactable("Grab a piece of green melon?", true, "Green melon", 20));
+			interactablesScript[2].add(new Interactable("Grab the picnic basket?", true, "Picnic", 40));
+			interactablesScript[2].add(new Interactable("Grab a slice of chicken?", true, "Chicken", 50));
+			interactablesScript[2].add(new Interactable("Grab a piece of blue melon?", true, "Blue melon", 30));
 			interactablesScript[2].add(new Interactable("You encounter a strange, unidentifiable... creature? Fight?", true, "boss", 0));
 			
 			for (int i = 0; i < 6; i++) {
@@ -342,8 +365,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		frame = new JFrame("OMORI");
 		panel = new Main();
 		panel.setLayout(new FlowLayout());
-//		panel.add(playerHealthBar);
-//		panel.add(bossHealthBar);
 		frame.add(panel);
 		frame.pack();
 		frame.setVisible(true);
@@ -362,21 +383,18 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		
 		
 	
-		// play song
-		if(menuState != 4) {
-			if (!settingSongPlayed[menuState]) {
-	
-				try {
-					sound.playSettingMusic(menuState);
-				} catch (LineUnavailableException | IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				settingSongPlayed[menuState] = true;
-	
-			} 
-		}
+		// play the setting's theme
+		if (!settingSongPlayed[menuState]) {
+			try {
+				sound.playSettingMusic(menuState);
+			} catch (LineUnavailableException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			settingSongPlayed[menuState] = true;
+		} 
 		
+		// main menu 
 		if (menuState == 0) {
 			if (submenuOption == 0) {
 				if (hoveringSecret) {
@@ -393,6 +411,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				g2d.drawImage(aboutMenu, 0, 0, null);
 			}
 		}
+		
+		// in game
 		else if (menuState > 0 && menuState < 4) {
 		
 			// when user is fighting boss
@@ -461,7 +481,15 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					else if(playerHealth == 0) dialogue = 6;
 					
 					// draw the dialogue when the image of boss with dialogue box is displayed
-					if(fightState == 0) g2d.drawString(bossDialogue[dialogue], 200, 420);
+					if(fightState == 0) {
+						g2d.drawString(bossDialogue[dialogue], 200, 420);
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
 					
 					// if damage has been dealt, display the damage
 					if(damage > 0) {
@@ -520,10 +548,12 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						System.out.println("boss appear: X: " + curPosX);
 	
 					}
+					// jumpscare animation
 					if (showScare) {
 						g2d.drawImage(scareImages[curScare], scareX, scareY, null);
 					}
 					
+					// we are in a dialogue frame
 					if (speaking) {
 						
 						Interactable cur = null;
@@ -532,21 +562,26 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						down = false;
 						right = false;
 						left = false;
+						// play the opening script on entry
 						if (!scriptRead[menuState]) {
 							g2d.drawImage(speechBoxes[menuState], 0, 260, null);
 							cur = mainScript[menuState];
 							curSlides = cur.getSlides();
 						}
+						// play the interactable script
 						else {
 							g2d.drawImage(speechBoxes[0], 0, 434, null);
 							cur = interactablesScript[menuState].get(interactableScript);
 							curSlides = cur.getSlides();
 						}
+						// script is finished
 						if (speakingInd == cur.getSlidesSize()) {
 							choosing = false;
 							speakingInd = 0;
 							speaking = false;
-
+							
+							// if we said yes to take the pills
+							// so we transition to menuState 2
 							if (menuState == 1 && interactableScript == 0 && choice) {
 								menuState = 2;
 								System.out.println("new world");
@@ -555,6 +590,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 								playerIndex = 1;
 								speaking = true;
 							}
+							// if we said yes to fight the boss
 							else if (menuState == 2 && choice && scriptRead[menuState]) {
 								if(interactableScript == 5) {
 									fight = true;
@@ -566,10 +602,15 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 								    
 									System.out.println("start fight");
 								}
+								
+								// otherwise we said yes to grabbing items
 								else {
 									try {
-										sound.playSoundEffect(10);
+										sound.playSoundEffect(5);
 										String curItem = interactablesScript[menuState].get(interactableScript).getName();
+										
+										// keep track of items in our backpack which is a hashmap that stores
+										// backpack = new HashMap [name of item, frequency]
 										backpack.put(curItem, backpack.get(curItem) + 1);
 										healsVisited[interactableScript] = true;
 										System.out.println("bagged");
@@ -580,6 +621,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 								}
 								
 							}
+							// exit script
 							else {
 								scriptRead[menuState] = true;
 								choice = true;
@@ -588,17 +630,20 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 
 						}
 						else {
+							// draw the actual text from script on screen
 							g2d.drawString(curSlides.get(speakingInd)[0], 25, 480);
 							g2d.drawString(curSlides.get(speakingInd)[1], 25, 520);
 							g2d.drawString(curSlides.get(speakingInd)[2], 25, 560);			
-//							System.out.println(choosing);
+							
+							// if the dialogue allows yes / no choice
 							if (speakingInd == cur.getSlidesSize() - 1 && choosing) {			
-								System.out.println("wagnan");
 								g2d.drawImage(selector, (choice) ? 200: 525, 540, null);
 							
 							}
 						}
 					}
+					
+					// show inventory
 					else if (showInventory) {
 						g2d.setFont(inventoryFont);
 						g2d.drawImage(inventoryMenu, 0, 349, null);
@@ -615,6 +660,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				}
 			}
 		}
+		
+		// draw the winning screen
 		else {
 			g2d.drawImage(screens[4], 0, 0, null);
 		}
@@ -632,6 +679,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			}
 			int posX = mapX;
 			int posY = mapY;
+			
+			
+			// check if hovering on secret area
 			if (menuState == 0 && submenuOption == 0) {
 				if (within(new Rectangle(416, 93, 63, 49), getMousePosition()) || within(new Rectangle(424, 59, 47, 33), getMousePosition()) && !hoveringSecret) {
 					hoveringSecret = true;
@@ -694,9 +744,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 //					System.out.println(mapX);
 				}
 				else {
+					
+					// scare animation
 					if (showScare) {
-						scareX += directions[direction][0] * 2;
-						scareY += directions[direction][1] * 2;
+						scareX += directions[direction][0] * 4;
+						scareY += directions[direction][1] * 4;
 						System.out.println(scareX +  " " + scareY);
 						BufferedImage curImage = scareImages[curScare];
 						int a = curImage.getWidth();
@@ -708,6 +760,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						}
 						repaint();
 					}
+					
+					
+					// character movement
 					if(up && withinBounds(bounds[menuState], new Point(posX, posY - charSpeed))) {
 						Player.key = 1;
 						// playerY -= 10;
@@ -747,7 +802,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	
 					}
 					
-					// if they have left 1 quadrant of the whitespace
+					// if they have left 1 quadrant of whitespace
+					// redraw that one quadrant
 					if (menuState == 1) {
 						if (mapY < 800) {
 							mapY = 1600;
@@ -783,9 +839,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 							if(!test) {
 								test = true;
 								try {
-									sound.mapSongs[2] = AudioSystem.getAudioInputStream(new File("assets/music/ForestChillin.wav"));
 									sound.playSettingMusic(menuState);
-								} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+								} catch (IOException | LineUnavailableException e) {
 									e.printStackTrace();
 								}
 								
@@ -868,12 +923,14 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 							mapX = 1580;
 							mapY = 1690;
 							menuState = 3;
+							speaking = true;
 						}
 					}
 					
 					
 					
-					// black space
+					// if they have left 1 quadrant of blackspace
+					// redraw that one quadrant
 					if (menuState == 3) {
 						if (mapY < 1000) {
 							mapY = 2394;
@@ -897,7 +954,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	
 
 	
-
+	/*
+	 * This method checks if a point is within a rectangle.
+	 * Used for checking boundaries and clicking buttons on the menu.
+	 */
 	public boolean within(Rectangle r, Point p) {
 		if (p == null) return false;
 		if (r.x < p.x && p.x < r.x + r.width) {
@@ -914,7 +974,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	// go right up to the side as defined by their coordinates in the constructor.
 	// we need interact() to see if the character is at the side
 	
-	
+	// -1 because the character moves at speed = 2, which is an even number. 
+	// if we had boundaries at an odd number we wouldn't be able to interact with them
+	// because within() wouldn't let us in the rectangle, so we would always be 1 short of 
+	// meeting the perimeter of the rectangle. 
 	public boolean interact(Rectangle r, Point p) {
 		if (r.x - 1<= p.x && p.x <= r.x + r.width + 1) {
 			if (r.y - 1 <= p.y && p.y <= r.y + r.height + 1) {
@@ -923,6 +986,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		}
 		return false;
 	}
+	
+	/*
+	 * checks if the player is within bounds of the map.
+	 * Player can only move through defined spaces and NOT through interactables
+	 */
 	public boolean withinBounds(ArrayList<Rectangle>[] r, Point p) {
 		
 		// if we are on top of an interactable object
@@ -943,6 +1011,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	
 
 	@Override
+	/*
+	 * all mouse stuff is for the main menu
+	 */
 	public void mousePressed(MouseEvent e){
 		mouseX = e.getX();
 		mouseY = e.getY();
@@ -952,10 +1023,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					
 					// play game
 					if (within(new Rectangle(142, 545, 169, 40), getMousePosition())) {
-						menuState = 2; // 1
+						menuState = 1; // 1
 						System.out.println("clicked");
-						mapX = 2554; // 1050
-						mapY = 3424; // 1200
+						mapX = 1050; // 1050
+						mapY = 1200; // 1200
+						speaking = true;
 						sound.playSoundEffect(7);
 					}
 					// options
@@ -974,6 +1046,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						sound.playSoundEffect(7);
 					}
 				}
+				// back
 				else if (submenuOption == 1 || submenuOption == 2) {
 					if (within(new Rectangle(45, 548, 169, 40), getMousePosition())) {
 						submenuOption = 0;
@@ -1123,28 +1196,33 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 							if(fightState == 8) { // select green melon
 								System.out.println("green");
 								if(backpack.get("Green melon") > 0) {
-									playerHealth += 10;
+									playerHealth += 20;
+									backpack.put("Green melon", backpack.get("Green melon") - 1);
 									valid = true;
 								}
 							}
 							else if(fightState == 9) { // select blue melon
 								System.out.println("blue");
 								if(backpack.get("Blue melon") > 0) {
-									playerHealth += 15;
+									playerHealth += 30;
+									backpack.put("Blue melon", backpack.get("Blue melon") - 1);
 									valid = true;
 								}
 							}
 							else if(fightState == 10) { // select picnic
 								System.out.println("picnic");
 								if(backpack.get("Picnic") > 0) {
-									playerHealth += 20;
+									playerHealth += 40;
+									backpack.put("Picnic", backpack.get("Picnic") - 1);
+
 									valid = true;
 								}
 							}
 							else if(fightState == 11) { // select chicken
 								System.out.println("chicken");
 								if(backpack.get("Chicken") > 0) {
-									playerHealth += 30;
+									playerHealth += 50;
+									backpack.put("Chicken", backpack.get("Chicken") - 1);
 									valid = true;
 								}
 							}
@@ -1160,8 +1238,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				
 			}
 			
-			
-			else if (menuState > 0 && appear != 1) {
+			// movement keys
+			else if (menuState < 4 && menuState > 0 && appear != 1) {
 				// w
 				if(key == 38 && !speaking) {
 					up = true;
@@ -1187,28 +1265,34 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				if (key == 90 && !speaking) {
 					int a = mapX;
 					int b = mapY;
+					
+					// go through all interactable areas of the menuState and see 
+					// if we are actually on top of one
 					for (int i = 0; i < interactables[menuState].size(); i++) {
 						if (interact(interactables[menuState].get(i), new Point(a, b))) {
+							
+							// if we visited a heal then don't allow user to get it again
 							if (menuState == 2 && healsVisited[i]) continue;
-							System.out.println("Interacted");
+							
 							try {
-								
 								// the doors will play a lock / unlock sound in BLACKSPACE
 								if (menuState == 3 && i < 6) {
 									if (!doorsVisited[i]) {
 										sound.playSoundEffect(8);
 										doorsVisited[i] = true;
 										
-										// win the game
+										// picked the right door --> win the game
 										if (i == 5) {
 											System.out.println("win");
 											menuState = 4;
 										}
+										// picked the wrong door --> scare
 										else {
 											scare(i);
 											curScare = i;
 										}
 									}
+									// we already visited this door --> play lockedDoor sound
 									else sound.playSoundEffect(9);
 								}
 								// default interact sound
@@ -1217,8 +1301,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	
 								}
 							} catch (LineUnavailableException | IOException e1) { e1.printStackTrace();}
+							
 							if(menuState != 4) {
 								Interactable cur = interactablesScript[menuState].get(i);
+								// if we have a script for this interactable, then set the appropriate variables
 								if (cur != null) {
 									speaking = true;
 									interactableScript = i;
@@ -1230,18 +1316,25 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 									}
 								}
 							}
-	
+
 						}
 						
 					}
+					
 				}
-				// x flip page / script
 				else if (key == 88) {
+					
+					// x flip page on script 
 					if (speaking) {
 						speakingInd++;
 						System.out.println('x');
 					}
+					// on win screen. go back to main menu
+					if (menuState == 4) {
+						menuState = 0;
+					}
 				}
+				// run faster by holding shift
 				else if (key == 16 && !speaking) {
 					charSpeed = 4;
 				}
@@ -1264,6 +1357,12 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		repaint();
 		
 	}
+	
+	/*
+	 * This method is used in BLACKSPACE, where the user must try to exit the game by using doors.
+	 * It loads the scare image by having it travel up, down, left, or right through the screen.
+	 * It also plays a scary sound.
+	 */
 	public void scare(int n) {
 
 		try {
@@ -1301,6 +1400,9 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		// TODO Auto-generated method stub
 		int key = e.getKeyCode();
 		if (menuState > 0 && !speaking) {
+			
+			// all movement. 
+			// once a key is released, go back to default standing position
 			// w
 			if(key == 38) {
 				System.out.println("w releaes");
@@ -1330,6 +1432,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				if(!up && !down && !left && !right) playerIndex = 7;
 				xCounter = 0;
 			}
+			
+			// release shift key, go back to walking pace
 			else if (key == 16) {
 				charSpeed = 2;
 			}

@@ -1,21 +1,28 @@
-
+/*
+ * This class is for all audio-related purposes for the game.
+ * It stores all sound effects and map songs.
+ * It also has methods to play these sounds.
+ */
 import java.util.*;
 import java.io.*;
 import javax.sound.sampled.*;
 public class Audio {
 	
-	static AudioInputStream[] mapSongs = new AudioInputStream[4];
+	static AudioInputStream[] mapSongs = new AudioInputStream[5];
 	static ArrayList<Clip> soundEffects = new ArrayList<Clip>();
 	static ArrayList<String> soundEffectNames = new ArrayList<String>();
 	static  Clip settingMusic;
 	static  Clip soundEffect;
 	static int lastPlayedSoundEffect;
+	
+	// all imports
 	public Audio() {
 		try {
 			mapSongs[0] = AudioSystem.getAudioInputStream(new File("assets/music/Title.wav"));
-			mapSongs[1] = AudioSystem.getAudioInputStream(new File("assets/music/WHITESPACE2.wav"));
+			mapSongs[1] = AudioSystem.getAudioInputStream(new File("assets/music/WHITESPACE.wav"));
 			mapSongs[2] = AudioSystem.getAudioInputStream(new File("assets/music/ForestChillin.wav"));
 			mapSongs[3] = AudioSystem.getAudioInputStream(new File("assets/music/BLACKSPACE.wav"));
+			mapSongs[4] = AudioSystem.getAudioInputStream(new File("assets/music/win.wav"));
 			for (int i = 1; i <= 5; i++) {
 				soundEffectNames.add("scare" + i);
 			}
@@ -30,6 +37,7 @@ public class Audio {
 				soundEffects.add(AudioSystem.getClip());
 				soundEffects.get(i).open(AudioSystem.getAudioInputStream(new File("assets/sounds/" + soundEffectNames.get(i) + ".wav")));
 			}
+			System.out.println(soundEffects.size());
 
 		}
 		catch (IOException | UnsupportedAudioFileException | LineUnavailableException e1) {
@@ -37,13 +45,16 @@ public class Audio {
 		}
 	}
 	
-
+	
+	// play the current setting music given the menuState
 	public void playSettingMusic(int menuState) throws LineUnavailableException, IOException {
-	    if (settingMusic != null && settingMusic.isRunning()) {
+	    // if a song is already running and the method is called to play another one, close the current song
+		if (settingMusic != null && settingMusic.isRunning()) {
 	        settingMusic.stop();
 	        settingMusic.close();
 	    }
-
+	    
+	    // open, set the song at the beginning, play
 	    settingMusic = AudioSystem.getClip();
 	    settingMusic.open(mapSongs[menuState]);
 	    settingMusic.setFramePosition(0);
@@ -51,7 +62,8 @@ public class Audio {
 	    settingMusic.loop(Clip.LOOP_CONTINUOUSLY);
 	    System.out.println("play it");
 	}
-
+	
+	// play a sound effect given the index of the sound effect
 	public void playSoundEffect(int n) throws LineUnavailableException, IOException {
 		System.out.println("BLAH3");
 	    Clip cur = soundEffects.get(n);
