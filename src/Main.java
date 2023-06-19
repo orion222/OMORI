@@ -122,11 +122,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 	public static BufferedImage gameOver;
 	public static AudioInputStream music, music2;
 	public static Clip bossMusic, gameOverMusic; // boss bg music and game over music
-	public static boolean test = false; // to replay bg music after defeating boss
 	
-	static boolean[] healsVisited = new boolean[6];
-	static boolean[] doorsVisited = new boolean[10];  
-	HashMap<String, Integer> backpack = new HashMap<String, Integer>();
+	static boolean[] healsVisited;
+	static boolean[] doorsVisited;  
+	static HashMap<String, Integer> backpack = new HashMap<String, Integer>();
 	
 	public Main() throws UnsupportedAudioFileException, LineUnavailableException {
 		setPreferredSize(new Dimension(windowWidth, windowHeight));
@@ -261,7 +260,6 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		interactables[2].add(new Rectangle(2810, 2150, 72, 72)); // picnic basket
 		interactables[2].add(new Rectangle(2916, 2268, 74, 68)); // chicken
 		interactables[2].add(new Rectangle(3722, 2604, 68, 68)); // blue melon
-		interactables[2].add(new Rectangle(2490, 3946, 150, 10)); // boss
 		
 		// doors, starting from one on the left. clockwise fashion
 		interactables[3].add(new Rectangle(1248, 1624, 82, 80));
@@ -484,7 +482,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					if(fightState == 0) {
 						g2d.drawString(bossDialogue[dialogue], 200, 420);
 						try {
-							Thread.sleep(1000);
+							Thread.sleep(1500);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -825,19 +823,14 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						// if player or boss die, delay
 						if(fight && (bossHealth <= 0 || playerHealth <= 0)) {
 							try {
-								Thread.sleep(1000);
+								Thread.sleep(3000);
 							} catch (InterruptedException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 							fight = false;
-	
-						}
-						if(fight == false && (bossHealth <= 0 || playerHealth <= 0)) {
-							repaint();
-							
-							if(!test) {
-								test = true;
+							speaking = false;
+							if(playerHealth > 0) {
 								try {
 									sound.playSettingMusic(menuState);
 								} catch (IOException | LineUnavailableException e) {
@@ -845,8 +838,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 								}
 								
 							}
+							repaint();
 						}
-						if(!turn && bossHealth > 0 && fight) {
+	
+
+						else if(!turn && bossHealth > 0 && fight) {
 							
 							try {
 								Thread.sleep(1000);
@@ -876,7 +872,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 							repaint();
 							
 							try {
-								Thread.sleep(800);
+								Thread.sleep(2000);
 							} catch (InterruptedException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -1009,6 +1005,28 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 		return false;
 	}
 	
+	public void resetVars() throws IOException {
+		mapX = 1050; // 1050
+		mapY = 1200; // 1200
+		appear = 0;
+		playerIndex = 1;
+		speaking = true;
+		settingSongPlayed = new boolean[5];
+		doorsVisited = new boolean[10];
+		healsVisited = new boolean[6];
+		scriptRead = new boolean[5];
+		bounds[2][0].add(new Rectangle(2490, 3946, 150, 10)); // add the boss 
+		screens[2] = ImageIO.read(new File("assets/gameScreens/mapwithboss.png")); // draw the boss
+		tempX = 400;
+		tempY = 250;
+		bossHealth = 200;
+		playerHealth = 125;
+		dialogue = 0;
+		backpack.put("Green melon", 0);
+		backpack.put("Blue melon", 0);
+		backpack.put("Picnic", 0);
+		backpack.put("Chicken", 0);
+	}
 
 	@Override
 	/*
@@ -1023,11 +1041,10 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					
 					// play game
 					if (within(new Rectangle(142, 545, 169, 40), getMousePosition())) {
+						
+						resetVars();
 						menuState = 1; // 1
 						System.out.println("clicked");
-						mapX = 1050; // 1050
-						mapY = 1200; // 1200
-						speaking = true;
 						sound.playSoundEffect(7);
 					}
 					// options
@@ -1119,7 +1136,8 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						        bossMusic.stop();
 						    }
 
-							sound.mapSongs[2] = AudioSystem.getAudioInputStream(new File("assets/music/ForestChillin.wav"));
+							sound.mapSongs.set(2, AudioSystem.getClip());
+							sound.mapSongs.get(2).open(AudioSystem.getAudioInputStream(new File("assets/music/ForestChillin.wav")));
 							sound.playSettingMusic(menuState);
 
 							fight = false;
@@ -1239,7 +1257,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 			}
 			
 			// movement keys
-			else if (menuState < 4 && menuState > 0 && appear != 1) {
+			else if (menuState > 0 && appear != 1) {
 				// w
 				if(key == 38 && !speaking) {
 					up = true;
@@ -1277,6 +1295,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 							try {
 								// the doors will play a lock / unlock sound in BLACKSPACE
 								if (menuState == 3 && i < 6) {
+									System.out.println(doorsVisited[i]);
 									if (!doorsVisited[i]) {
 										sound.playSoundEffect(8);
 										doorsVisited[i] = true;
@@ -1329,6 +1348,11 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 						speakingInd++;
 						System.out.println('x');
 					}
+					else if (menuState == 4 || playerHealth <= 0) {
+						menuState = 0;
+						gameOverMusic.stop();
+						gameOverMusic.setFramePosition(0);
+					}
 
 				}
 				// run faster by holding shift
@@ -1340,12 +1364,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 					showInventory ^= true;
 				}
 			}
-			else if (key == 88 && menuState == 4) {
-				menuState = 0;
-				settingSongPlayed = new boolean[5];
-				doorsVisited = new boolean[10];
-				healsVisited = new boolean[6];
-			}
+
 		}
 		
 		catch (LineUnavailableException e1) {
@@ -1427,7 +1446,7 @@ public class Main extends JPanel implements KeyListener, MouseListener, Runnable
 				System.out.println("s release");
 				down = false;
 				if(!up && !down && !left && !right) playerIndex = 1;
-				yCounter = 0;
+		
 			}
 			// d
 			else if(key == 39) {

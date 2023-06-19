@@ -8,21 +8,23 @@ import java.io.*;
 import javax.sound.sampled.*;
 public class Audio {
 	
-	static AudioInputStream[] mapSongs = new AudioInputStream[5];
+	static ArrayList<Clip> mapSongs = new ArrayList<Clip>();
+	static ArrayList<String> mapSongNames = new ArrayList<String>();
 	static ArrayList<Clip> soundEffects = new ArrayList<Clip>();
 	static ArrayList<String> soundEffectNames = new ArrayList<String>();
 	static  Clip settingMusic;
-	static  Clip soundEffect;
-	static int lastPlayedSoundEffect;
+
 	
 	// all imports
 	public Audio() {
 		try {
-			mapSongs[0] = AudioSystem.getAudioInputStream(new File("assets/music/Title.wav"));
-			mapSongs[1] = AudioSystem.getAudioInputStream(new File("assets/music/WHITESPACE.wav"));
-			mapSongs[2] = AudioSystem.getAudioInputStream(new File("assets/music/ForestChillin.wav"));
-			mapSongs[3] = AudioSystem.getAudioInputStream(new File("assets/music/BLACKSPACE.wav"));
-			mapSongs[4] = AudioSystem.getAudioInputStream(new File("assets/music/win.wav"));
+			
+			mapSongNames.add("Title");
+			mapSongNames.add("WHITESPACE");
+			mapSongNames.add("ForestChillin");
+			mapSongNames.add("BLACKSPACE");
+			mapSongNames.add("win");
+			
 			for (int i = 1; i <= 5; i++) {
 				soundEffectNames.add("scare" + i);
 			}
@@ -33,10 +35,16 @@ public class Audio {
 			soundEffectNames.add("lockedDoor");
 			soundEffectNames.add("interact");
 			soundEffectNames.add("hit");
+			
+			for (int i = 0; i < mapSongNames.size(); i++) {
+				mapSongs.add(AudioSystem.getClip());
+				mapSongs.get(i).open(AudioSystem.getAudioInputStream(new File("assets/music/" + mapSongNames.get(i) +  ".wav")));
+			}
 			for (int i = 0; i < soundEffectNames.size(); i++) {
 				soundEffects.add(AudioSystem.getClip());
 				soundEffects.get(i).open(AudioSystem.getAudioInputStream(new File("assets/sounds/" + soundEffectNames.get(i) + ".wav")));
 			}
+			
 			System.out.println(soundEffects.size());
 
 		}
@@ -51,12 +59,13 @@ public class Audio {
 	    // if a song is already running and the method is called to play another one, close the current song
 		if (settingMusic != null && settingMusic.isRunning()) {
 	        settingMusic.stop();
-	        settingMusic.close();
+	        
+	        // this line will actually NOT LET the song be played again once its closed.
+	        // settingMusic.close();
 	    }
 	    
 	    // open, set the song at the beginning, play
-	    settingMusic = AudioSystem.getClip();
-	    settingMusic.open(mapSongs[menuState]);
+	    settingMusic = mapSongs.get(menuState);
 	    settingMusic.setFramePosition(0);
 	    settingMusic.start();
 	    settingMusic.loop(Clip.LOOP_CONTINUOUSLY);
