@@ -9,3 +9,13 @@ Welcome to the **OMORI - Fan Remake**, an adaptation based on the game *OMORI*. 
 This repository is intended as an extension of the game's universe.
 
 **We are not affiliated with Omocat or the official OMORI game**. All trademarks and copyrights related to *OMORI* belong to Omocat.
+
+## 🕹️ How to Play
+To contribute or explore this repository:
+
+1. **Clone the repository**:
+    ```bash
+    git clone https://github.com/orion222/OMORI.git
+    ```
+2. **Run Main.java**
+   
