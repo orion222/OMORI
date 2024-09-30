@@ -17,5 +17,5 @@ To contribute or explore this repository:
     ```bash
     git clone https://github.com/orion222/OMORI.git
     ```
-2. **Open your IDE of choice**
-   Run `Main.java`
+2. **Open your IDE of choice**:
+   - Run `Main.java`
